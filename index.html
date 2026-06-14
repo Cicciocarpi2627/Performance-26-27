@@ -182,7 +182,7 @@ function sumK(rows,k){const v=rows.map(r=>r[k]).filter(x=>x!=null);if(!v.length)
 function scenFromSess(n){if(n>=8)return"Pre-season";if(n>=5)return"Normale";if(n>=3)return"Settimana corta";return"Post-partita";}
 
 // ===== NAV =====
-const PLAYER_PASSWORD = "ilmiocarpi2627!";
+const PLAYER_PASSWORD = "Inter2025!";
 let playerUnlocked = false;
 
 function showPage(p){
@@ -365,7 +365,9 @@ function tUpdateChart(){
   const td=data.filter(r=>r.PLAYER==='Team AVG'),tv=td.map(r=>r[kpi]).filter(x=>x!=null),ta=tv.length?(tv.reduce((a,b)=>a+b,0)/(tAgg==='avg'||KAVG[kpi]==='avg'?tv.length:1)):0;
   const cols=stats.map(s=>{if(!ta)return'rgba(220,38,38,.5)';const r=s.v/ta;return r>=1.1?'rgba(8,145,178,.6)':r>=.9?'rgba(5,150,105,.5)':r>=.7?'rgba(217,119,6,.5)':'rgba(220,38,38,.5)';});
   if(tCh)tCh.destroy();
-  tCh=new Chart(document.getElementById('tChart'),{type:'bar',data:{labels:stats.map(s=>s.p),datasets:[{label:kpi,data:stats.map(s=>s.v),backgroundColor:cols,borderRadius:3},{label:'Team AVG',data:stats.map(()=>ta),type:'line',borderColor:'#7C3AED',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6B7280',font:{family:'DM Sans',size:11}}}},scales:{x:{ticks:{color:'#6B7280',font:{family:'Space Mono',size:10}},grid:{color:'#E5E7EB'}},y:{ticks:{color:'#6B7280',font:{size:11}},grid:{color:'#F3F4F6'}}}}});
+  const chartHeight = Math.max(400, stats.length * 22);
+  document.getElementById('tChart').parentElement.style.height = chartHeight + 'px';
+  tCh=new Chart(document.getElementById('tChart'),{type:'bar',data:{labels:stats.map(s=>s.p),datasets:[{label:kpi,data:stats.map(s=>s.v),backgroundColor:cols,borderRadius:3},{label:'Team AVG',data:stats.map(()=>ta),type:'line',borderColor:'#7C3AED',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6B7280',font:{family:'DM Sans',size:11}}}},scales:{x:{ticks:{color:'#6B7280',font:{family:'Space Mono',size:10}},grid:{color:'#E5E7EB'}},y:{ticks:{color:'#6B7280',font:{size:10},autoSkip:false},grid:{color:'#F3F4F6'}}}}});
 }
 
 // ===== BOOT =====
