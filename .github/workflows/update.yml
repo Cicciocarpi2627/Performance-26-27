@@ -20,7 +20,7 @@ jobs:
         run: pip install pandas openpyxl gdown
 
       - name: Scarica XLSX da Google Drive
-        run: gdown "https://drive.google.com/uc?id=METTI_QUI_IL_TUO_ID" -O dati.xlsx
+        run: gdown "https://drive.google.com/uc?id=1KcF1dXYJLAb_XQkVQMJUSnOKaw6wrSdy" -O dati.xlsx
 
       - name: Genera HTML
         run: python genera_html.py
