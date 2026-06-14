@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -104,14 +105,14 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
   <div class="topbar-left">
     <span class="topbar-logo">GPS DASHBOARD</span>
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="showPage('player')">Giocatore</button>
-      <button class="nav-tab" onclick="showPage('team')">Team Overview</button>
+      <button class="nav-tab" onclick="showPage('player')">Giocatore</button>
+      <button class="nav-tab active" onclick="showPage('team')">Team Overview</button>
     </div>
   </div>
 </div>
 
 <!-- ==================== PAGE: PLAYER ==================== -->
-<div class="page active" id="pagPlayer">
+<div class="page" id="pagPlayer">
   <div class="filters-panel">
     <div class="filters-row">
       <div class="filter-group"><label>Giocatore</label><select id="pPlayer" onchange="pRefresh()"></select></div>
@@ -146,7 +147,7 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
 </div>
 
 <!-- ==================== PAGE: TEAM ==================== -->
-<div class="page" id="pagTeam">
+<div class="page active" id="pagTeam">
   <div class="filters-panel">
     <div class="filters-row">
       <div class="filter-group"><label>Filtro periodo</label><div class="mode-tabs"><button class="mode-tab active" id="tModeW" onclick="tSetFM('week')">Settimane</button><button class="mode-tab" id="tModeD" onclick="tSetFM('date')">Date</button></div></div>
@@ -181,7 +182,19 @@ function sumK(rows,k){const v=rows.map(r=>r[k]).filter(x=>x!=null);if(!v.length)
 function scenFromSess(n){if(n>=8)return"Pre-season";if(n>=5)return"Normale";if(n>=3)return"Settimana corta";return"Post-partita";}
 
 // ===== NAV =====
+const PLAYER_PASSWORD = "Inter2025!";
+let playerUnlocked = false;
+
 function showPage(p){
+  if(p==='player' && !playerUnlocked){
+    const pw = prompt("Inserisci la password per accedere alla sezione Giocatore:");
+    if(pw === PLAYER_PASSWORD){
+      playerUnlocked = true;
+    } else {
+      if(pw !== null) alert("Password errata.");
+      return;
+    }
+  }
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
   if(p==='player'){document.getElementById('pagPlayer').classList.add('active');document.querySelectorAll('.nav-tab')[0].classList.add('active');}
