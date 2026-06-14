@@ -1,24 +1,87 @@
+"""
+Aggiorna il file index.html (dashboard GPS) sostituendo l'array `const D=[...]`
+con i dati provenienti dal file Excel "Dati Giornalieri per pBI".
+
+Uso:
+    python genera_html.py dati.xlsx index.html
+"""
+
+import sys
+import re
+import json
 import pandas as pd
 
-df = pd.read_excel("dati.xlsx")
 
-html_table = df.to_html(index=False, classes="tabella", border=0)
+# Colonne effettivamente usate dalla dashboard (ordine = ordine nell'array originale)
+COLS = [
+    "DATA", "WEEK", "NEXT MD", "SESSION TYPE", "PLAYER", "DIFF",
+    "MIN", "D", "D/MIN", "D>16", "D>20", "D>25", "D>30",
+    "DA>2", "DA>3", "DD<-2", "DD<-3",
+]
 
-template = f"""<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <title>Dati</title>
-    <style>
-        body {{ font-family: Arial, sans-serif; margin: 2rem; }}
-        table {{ border-collapse: collapse; width: 100%; }}
-        th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-        th {{ background-color: #f2f2f2; }}
-        tr:nth-child(even) {{ background-color: #fafafa; }}
-    </style>
-</head>
-<body>
-    <h1>Dati aggiornati</h1>
+# Colonne che devono essere numeri intere (WEEK, NEXT MD, DIFF)
+INT_COLS = {"WEEK", "NEXT MD", "DIFF"}
+
+
+def round_value(col, val):
+    if pd.isna(val):
+        return None
+    if col == "DATA":
+        return val.strftime("%Y-%m-%d") if hasattr(val, "strftime") else str(val)
+    if col in INT_COLS:
+        return int(val)
+    if isinstance(val, float):
+        return round(val, 1)
+    return val
+
+
+def build_records(xlsx_path):
+    df = pd.read_excel(xlsx_path)
+    df = df.dropna(axis=1, how="all")
+
+    # Tieniamo solo le righe con dati effettivi (PLAYER e D presenti)
+    df = df.dropna(subset=["PLAYER", "D"])
+
+    records = []
+    for _, row in df.iterrows():
+        rec = {}
+        for col in COLS:
+            v = round_value(col, row.get(col))
+            if v is not None:
+                rec[col] = v
+        records.append(rec)
+    return records
+
+
+def update_html(html_path, records, output_path=None):
+    with open(html_path, "r", encoding="utf-8") as f:
+        html = f.read()
+
+    new_array = "const D=" + json.dumps(records, ensure_ascii=False, separators=(",", ":")) + ";"
+
+    pattern = re.compile(r"const D=\[.*?\];", re.DOTALL)
+    if not pattern.search(html):
+        raise RuntimeError("Non ho trovato 'const D=[...]' nel file HTML.")
+
+    new_html = pattern.sub(new_array, html, count=1)
+
+    out = output_path or html_path
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(new_html)
+
+    print(f"Aggiornati {len(records)} record. File scritto in: {out}")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Uso: python genera_html.py dati.xlsx index.html")
+        sys.exit(1)
+
+    xlsx_path = sys.argv[1]
+    html_path = sys.argv[2]
+
+    recs = build_records(xlsx_path)
+    update_html(html_path, recs)
     {html_table}
 </body>
 </html>"""
