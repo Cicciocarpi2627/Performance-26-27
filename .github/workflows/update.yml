@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: aggiorna-dashboard
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,11 +32,19 @@ jobs:
       - name: Aggiorna index.html
         run: python genera_html.py dati.xlsx index.html
 
-        - name: Commit e push se ci sono modifiche
+      - name: Commit e push se ci sono modifiche
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --staged --quiet || (git commit -m "Aggiornamento dati GPS" && git pull --rebase origin main && git push)
-
-   
+          if ! git diff --staged --quiet; then
+            git commit -m "Aggiornamento dati GPS"
+            for i in 1 2 3 4 5; do
+              git fetch origin main
+              git rebase origin/main && git push origin main && break
+              git rebase --abort || true
+              sleep 5
+            done
+          else
+            echo "Nessuna modifica da pubblicare."
+          fi
