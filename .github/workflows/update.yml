@@ -1,32 +1,27 @@
 name: Aggiorna dashboard GPS da Google Drive
-
 on:
   schedule:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Installa dipendenze
         run: pip install pandas openpyxl gdown
-
       - name: Scarica XLSX da Google Drive
-        run: gdown "https://drive.google.com/uc?id=1KcF1dXYJLAb_XQkVQMJUSnOKaw6wrSdy" -O dati.xlsx
-
+        run: gdown "https://drive.google.com/uc?id=1KcF1dXYJLAb_XQkVQMJUSnOKaw6wrSdy" -O dati.xlsx --fuzzy
       - name: Aggiorna index.html
         run: python genera_html.py dati.xlsx index.html
-
       - name: Commit e push se ci sono modifiche
         run: |
           git config user.name "github-actions[bot]"
