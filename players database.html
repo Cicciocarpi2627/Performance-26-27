@@ -321,12 +321,24 @@ textarea.inp{resize:vertical;min-height:65px}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
     New Session
   </div>
+  <div class="sb-item" id="nav-antro" onclick="setView('antro',this,'perf')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    Antro
+  </div>
+  <div class="sb-item" id="nav-injury" onclick="setView('injury',this,'perf')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/><path d="M3.22 8.5h3.5l1.5-2 2.5 5 1.5-2h3.5"/></svg>
+    Injury
+  </div>
 
   <div class="sb-divider"></div>
   <div class="sb-section">Risorse</div>
   <a href="https://musclewiki.com/it-it" target="_blank" class="sb-item" style="text-decoration:none">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
     MuscleWiki
+  </a>
+  <a href="https://cicciocarpi2627.github.io/Performance-26-27/" target="_blank" class="sb-item" style="text-decoration:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg>
+    GPS Dashboard
   </a>
   <div class="sb-item" id="nav-importa" onclick="setView('importa',this,'osteo')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -440,6 +452,34 @@ textarea.inp{resize:vertical;min-height:65px}
       <div id="schede-container"></div>
     </div>
 
+    <!-- ═══ VIEW ANTRO ═══ -->
+    <div id="view-antro" class="view">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700">Antro</h2>
+          <p style="font-size:13px;color:var(--muted);margin-top:3px">Anthropometric measurements &amp; test sessions</p>
+        </div>
+        <select class="fsel" id="antro-filter-paz" onchange="renderAntroView()" style="max-width:260px">
+          <option value="">All players</option>
+        </select>
+      </div>
+      <div id="antro-view-container"></div>
+    </div>
+
+    <!-- ═══ VIEW INJURY ═══ -->
+    <div id="view-injury" class="view">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700">Injury</h2>
+          <p style="font-size:13px;color:var(--muted);margin-top:3px">Injury history &amp; tracking</p>
+        </div>
+        <select class="fsel" id="injury-filter-paz" onchange="renderInjuryView()" style="max-width:260px">
+          <option value="">All players</option>
+        </select>
+      </div>
+      <div id="injury-view-container"></div>
+    </div>
+
     <!-- ═══ VIEW GRUPPI ═══ -->
     <div id="view-gruppi" class="view">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
@@ -500,7 +540,9 @@ textarea.inp{resize:vertical;min-height:65px}
     <div class="tabs" id="paz-tabs">
       <button class="tab on-osteo" onclick="pazTab(0,this)">Personal Info</button>
       <button class="tab" onclick="pazTab(1,this)">Context &amp; Sport</button>
-      <button class="tab" onclick="pazTab(2,this)">Attachments</button>
+      <button class="tab" onclick="pazTab(2,this)">Antro</button>
+      <button class="tab" onclick="pazTab(3,this)">Injury</button>
+      <button class="tab" onclick="pazTab(4,this)">Attachments</button>
     </div>
 
     <!-- TAB 0: ANAGRAFICA -->
@@ -572,8 +614,32 @@ textarea.inp{resize:vertical;min-height:65px}
       </div>
     </div>
 
-    <!-- TAB 2: ALLEGATI -->
+    <!-- TAB 2: ANTRO -->
     <div id="ptab-2" class="hidden">
+      <div class="p-sec-title" style="margin-bottom:8px">Anthropometric Sessions</div>
+      <div id="antro-misure-list"></div>
+      <button type="button" class="btn btn-outline btn-sm" style="margin-top:6px" onclick="addAntroMisura()">+ Add session</button>
+
+      <div class="p-sec-title" style="margin:18px 0 8px">Test Sessions</div>
+      <div id="antro-test-list"></div>
+      <button type="button" class="btn btn-outline btn-sm" style="margin-top:6px" onclick="addAntroTest()">+ Add test</button>
+      <datalist id="antro-units">
+        <option value="kg"></option><option value="cm"></option><option value="mm"></option>
+        <option value="%"></option><option value="bpm"></option><option value="sec"></option>
+        <option value="min"></option><option value="m"></option><option value="W"></option>
+        <option value="kg/cm²"></option>
+      </datalist>
+    </div>
+
+    <!-- TAB 3: INJURY -->
+    <div id="ptab-3" class="hidden">
+      <div class="p-sec-title" style="margin-bottom:8px">Injury Sessions</div>
+      <div id="injury-list"></div>
+      <button type="button" class="btn btn-outline btn-sm" style="margin-top:6px" onclick="addInjury()">+ Add injury</button>
+    </div>
+
+    <!-- TAB 4: ALLEGATI -->
+    <div id="ptab-4" class="hidden">
       <div class="attach-upload" onclick="document.getElementById('attach-input').click()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
         <p><strong style="color:var(--accent-osteo)">Upload attachments</strong> (reports, images, documents)</p>
@@ -743,7 +809,7 @@ function setView(v,el,ctx){
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active-osteo','active-perf'));
   if(el)el.classList.add(ctx==='osteo'?'active-osteo':'active-perf');
   document.getElementById('topbar-title').textContent=
-    v==='pazienti'?'Players':v==='gruppi'?'Groups':v==='performance'?'Performance':'Import Dati';
+    v==='pazienti'?'Players':v==='gruppi'?'Groups':v==='performance'?'Performance':v==='antro'?'Antro':v==='injury'?'Injury':'Import Dati';
   const pill=document.getElementById('ctx-pill');
   const addBtn=document.getElementById('topbar-add');
   if(v==='performance'){
@@ -751,6 +817,11 @@ function setView(v,el,ctx){
     addBtn.className='btn btn-perf';
     addBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Session';
     addBtn.onclick=function(){openSchedaModal(null)};
+  } else if(v==='antro'||v==='injury'){
+    pill.className='context-pill pill-perf';pill.textContent='Performance';
+    addBtn.className='btn btn-osteo';
+    addBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Player';
+    addBtn.onclick=function(){openModal()};
   } else {
     pill.className='context-pill pill-perf';pill.textContent='Performance';
     addBtn.className='btn btn-osteo';
@@ -761,6 +832,8 @@ function setView(v,el,ctx){
   if(v==='pazienti')renderTable();
   if(v==='performance')renderSchede();
   if(v==='gruppi')renderGroups();
+  if(v==='antro')renderAntroView();
+  if(v==='injury')renderInjuryView();
 }
 
 // ═══════════════════════════════════════════════
@@ -858,6 +931,9 @@ function openPerfForPaz(id){
 // ═══════════════════════════════════════════════
 let editPazId=null;
 let pendingAttach=[];
+let pendingAntroMisure=[];
+let pendingAntroTest=[];
+let pendingInjury=[];
 
 function openModal(id){
   editPazId=id||null;
@@ -896,6 +972,9 @@ function openModal(id){
     document.getElementById('p-obiettivi').value=p.obiettivi||'';
     document.getElementById('p-anamnesi').value=p.anamnesi||'';
     pendingAttach=p.allegati?[...p.allegati]:[];
+    pendingAntroMisure=p.antroMisure?p.antroMisure.map(m=>({...m})):[];
+    pendingAntroTest=p.antroTest?p.antroTest.map(t=>({...t})):[];
+    pendingInjury=p.infortuni?p.infortuni.map(t=>({...t})):[];
   } else {
     document.getElementById('p-nome').value='';document.getElementById('p-cognome').value='';
     removePhoto();
@@ -908,8 +987,14 @@ function openModal(id){
     document.getElementById('p-ruolo').value='';document.getElementById('p-ruolo-wrap').classList.add('hidden');
     document.getElementById('p-professione').value='';document.getElementById('p-obiettivi').value='';
     document.getElementById('p-anamnesi').value='';
+    pendingAntroMisure=[];
+    pendingAntroTest=[];
+    pendingInjury=[];
   }
   renderAttachList();
+  renderAntroMisure();
+  renderAntroTest();
+  renderInjuryList();
   document.getElementById('modal-paz').classList.remove('hidden');
 }
 
@@ -959,7 +1044,7 @@ function closeModal(){document.getElementById('modal-paz').classList.add('hidden
 let activePazTab=0;
 function pazTab(i,el){
   activePazTab=i;
-  for(let j=0;j<3;j++){
+  for(let j=0;j<5;j++){
     const t=document.getElementById('ptab-'+j);
     t.classList.toggle('hidden',j!==i);
   }
@@ -992,6 +1077,9 @@ function savePaz(){
     obiettivi:document.getElementById('p-obiettivi').value.trim(),
     anamnesi:document.getElementById('p-anamnesi').value.trim(),
     allegati:[...pendingAttach],
+    antroMisure:pendingAntroMisure.map(m=>({...m})),
+    antroTest:pendingAntroTest.map(t=>({...t})),
+    infortuni:pendingInjury.map(t=>({...t})),
   };
   if(editPazId){
     const idx=paz.findIndex(x=>x.id===editPazId);
@@ -1033,6 +1121,233 @@ function renderAttachList(){
 }
 
 // ═══════════════════════════════════════════════
+// ANTRO VIEW
+// ═══════════════════════════════════════════════
+function renderAntroView(){
+  const sel=document.getElementById('antro-filter-paz');
+  const curVal=sel.value;
+  sel.innerHTML='<option value="">All players</option>';
+  paz.forEach(p=>{
+    sel.innerHTML+=`<option value="${p.id}">${p.cognome} ${p.nome}</option>`;
+  });
+  if(curVal)sel.value=curVal;
+
+  const pazFilt=sel.value?parseInt(sel.value):null;
+  const list=paz.filter(p=>(!pazFilt||p.id===pazFilt)&&((p.antroMisure&&p.antroMisure.length)||(p.antroTest&&p.antroTest.length)));
+
+  const cont=document.getElementById('antro-view-container');
+  if(!list.length){
+    cont.innerHTML=`<div class="empty-st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><p>No antro data found</p></div>`;
+    return;
+  }
+  cont.innerHTML=list.map(p=>{
+    const misure=(p.antroMisure||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    const test=(p.antroTest||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    return `
+    <div class="p-sec" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="p-sec-title" style="margin:0;font-size:14px">${p.cognome} ${p.nome}</div>
+        <button class="btn btn-outline btn-sm" onclick="openModal(${p.id})">Edit</button>
+      </div>
+      ${misure.length?`<div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Anthropometric Sessions</div>
+        <div class="table-wrap" style="border-radius:8px">
+          <table>
+            <thead><tr><th>Date</th><th>Weight (kg)</th><th>Height (m)</th><th>BMI</th></tr></thead>
+            <tbody>${misure.map(m=>`<tr><td>${m.date?fmtDate(m.date):'—'}</td><td>${m.peso||'—'}</td><td>${m.altezza||'—'}</td><td>${m.bmi||'—'}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>`:''}
+      ${test.length?`<div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Test Sessions</div>
+        <div class="table-wrap" style="border-radius:8px">
+          <table>
+            <thead><tr><th>Test</th><th>Date</th><th>Unit</th><th>Value</th></tr></thead>
+            <tbody>${test.map(t=>`<tr><td>${t.test||'—'}</td><td>${t.date?fmtDate(t.date):'—'}</td><td>${t.unit||'—'}</td><td>${t.value||'—'}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+
+// ═══════════════════════════════════════════════
+// INJURY VIEW
+// ═══════════════════════════════════════════════
+function renderInjuryView(){
+  const sel=document.getElementById('injury-filter-paz');
+  const curVal=sel.value;
+  sel.innerHTML='<option value="">All players</option>';
+  paz.forEach(p=>{
+    sel.innerHTML+=`<option value="${p.id}">${p.cognome} ${p.nome}</option>`;
+  });
+  if(curVal)sel.value=curVal;
+
+  const pazFilt=sel.value?parseInt(sel.value):null;
+  const list=paz.filter(p=>(!pazFilt||p.id===pazFilt)&&p.infortuni&&p.infortuni.length);
+
+  const cont=document.getElementById('injury-view-container');
+  if(!list.length){
+    cont.innerHTML=`<div class="empty-st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg><p>No injury data found</p></div>`;
+    return;
+  }
+  cont.innerHTML=list.map(p=>{
+    const inf=(p.infortuni||[]).slice().sort((a,b)=>(b.dataInizio||'').localeCompare(a.dataInizio||''));
+    return `
+    <div class="p-sec" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="p-sec-title" style="margin:0;font-size:14px">${p.cognome} ${p.nome}</div>
+        <button class="btn btn-outline btn-sm" onclick="openModal(${p.id})">Edit</button>
+      </div>
+      <div class="table-wrap" style="border-radius:8px">
+        <table>
+          <thead><tr><th>Start</th><th>End</th><th>Days</th><th>Injury</th><th>Description</th><th>Type</th><th>Region</th><th>Muscle</th><th>Event</th><th>Recurrence</th><th>Contact</th><th>Friendlies Out</th><th>Officials Out</th></tr></thead>
+          <tbody>${inf.map(i=>`<tr>
+            <td>${i.dataInizio?fmtDate(i.dataInizio):'—'}</td>
+            <td>${i.dataFine?fmtDate(i.dataFine):'—'}</td>
+            <td>${i.durata||'—'}</td>
+            <td>${i.infortunio||'—'}</td>
+            <td>${i.descrizione||'—'}</td>
+            <td>${i.tipologia||'—'}</td>
+            <td>${i.regione||'—'}</td>
+            <td>${i.muscolo||'—'}</td>
+            <td>${i.evento||'—'}</td>
+            <td>${i.recidiva||'—'}</td>
+            <td>${i.contatto||'—'}</td>
+            <td>${i.amichevoliOut||0}</td>
+            <td>${i.ufficialiOut||0}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+const INJURY_MAX=5;
+const INJ_TIPOLOGIA=['muscolare','articolare','contusivo','osseo','mio-tendineo','fasciale','altro'];
+const INJ_EVENTO=['allenamento','partita','altro'];
+function addInjury(){
+  if(pendingInjury.length>=INJURY_MAX){toast('Max '+INJURY_MAX+' injuries');return}
+  pendingInjury.push({dataInizio:'',dataFine:'',durata:'',infortunio:'',descrizione:'',tipologia:'',regione:'',muscolo:'',evento:'',recidiva:'no',contatto:'no',amichevoliOut:'',ufficialiOut:''});
+  renderInjuryList();
+}
+function removeInjury(i){pendingInjury.splice(i,1);renderInjuryList()}
+function updateInjury(i,field,val){
+  pendingInjury[i][field]=val;
+  const inj=pendingInjury[i];
+  if(inj.dataInizio&&inj.dataFine){
+    const d1=new Date(inj.dataInizio),d2=new Date(inj.dataFine);
+    const diff=Math.round((d2-d1)/(1000*60*60*24));
+    inj.durata=diff>=0?diff:'';
+  }else{
+    inj.durata='';
+  }
+  renderInjuryList();
+}
+function renderInjuryList(){
+  const el=document.getElementById('injury-list');
+  if(!el)return;
+  if(!pendingInjury.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:8px 0">No injuries added</div>';return}
+  el.innerHTML=pendingInjury.map((inj,i)=>`
+    <div class="fg" style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;position:relative">
+      <div class="fg-grp"><label class="lbl">Start Date</label><input class="inp" type="date" value="${inj.dataInizio||''}" onchange="updateInjury(${i},'dataInizio',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">End Date</label><input class="inp" type="date" value="${inj.dataFine||''}" onchange="updateInjury(${i},'dataFine',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Duration (days)</label><input class="inp" type="text" value="${inj.durata||''}" readonly style="background:#F3F4F6"/></div>
+      <div class="fg-grp"><label class="lbl">Injury</label><input class="inp" type="text" placeholder="e.g. distorsione, LCA…" value="${inj.infortunio||''}" onchange="updateInjury(${i},'infortunio',this.value)"/></div>
+      <div class="fg-grp fg-full"><label class="lbl">Description</label><input class="inp" type="text" placeholder="e.g. trauma diretto/indiretto, non traumatico…" value="${inj.descrizione||''}" onchange="updateInjury(${i},'descrizione',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Type</label>
+        <select class="inp" onchange="updateInjury(${i},'tipologia',this.value)">
+          <option value="">—</option>
+          ${INJ_TIPOLOGIA.map(o=>`<option value="${o}" ${inj.tipologia===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg-grp"><label class="lbl">Region</label><input class="inp" type="text" placeholder="e.g. ginocchio, caviglia…" value="${inj.regione||''}" onchange="updateInjury(${i},'regione',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Muscle</label><input class="inp" type="text" placeholder="e.g. retto femorale, adduttore…" value="${inj.muscolo||''}" onchange="updateInjury(${i},'muscolo',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Event</label>
+        <select class="inp" onchange="updateInjury(${i},'evento',this.value)">
+          <option value="">—</option>
+          ${INJ_EVENTO.map(o=>`<option value="${o}" ${inj.evento===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg-grp"><label class="lbl">Recurrence</label>
+        <select class="inp" onchange="updateInjury(${i},'recidiva',this.value)">
+          <option value="no" ${inj.recidiva==='no'?'selected':''}>no</option>
+          <option value="si" ${inj.recidiva==='si'?'selected':''}>si</option>
+        </select>
+      </div>
+      <div class="fg-grp"><label class="lbl">Contact</label>
+        <select class="inp" onchange="updateInjury(${i},'contatto',this.value)">
+          <option value="no" ${inj.contatto==='no'?'selected':''}>no</option>
+          <option value="si" ${inj.contatto==='si'?'selected':''}>si</option>
+        </select>
+      </div>
+      <div class="fg-grp"><label class="lbl">Friendlies Out</label><input class="inp" type="number" min="0" value="${inj.amichevoliOut||''}" onchange="updateInjury(${i},'amichevoliOut',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Official Matches Out</label><input class="inp" type="number" min="0" value="${inj.ufficialiOut||''}" onchange="updateInjury(${i},'ufficialiOut',this.value)"/></div>
+      <button type="button" class="ico-btn del btn-sm" style="position:absolute;top:6px;right:6px" onclick="removeInjury(${i})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+const ANTRO_MAX=5;
+function addAntroMisura(){
+  if(pendingAntroMisure.length>=ANTRO_MAX){toast('Max '+ANTRO_MAX+' sessions');return}
+  pendingAntroMisure.push({date:'',peso:'',altezza:'',bmi:''});
+  renderAntroMisure();
+}
+function removeAntroMisura(i){pendingAntroMisure.splice(i,1);renderAntroMisure()}
+function updateAntroMisura(i,field,val){
+  pendingAntroMisure[i][field]=val;
+  const m=pendingAntroMisure[i];
+  const w=parseFloat(m.peso),h=parseFloat(m.altezza);
+  if(w>0&&h>0){m.bmi=(w/(h*h)).toFixed(1)}else{m.bmi=''}
+  renderAntroMisure();
+}
+function renderAntroMisure(){
+  const el=document.getElementById('antro-misure-list');
+  if(!el)return;
+  if(!pendingAntroMisure.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:8px 0">No sessions added</div>';return}
+  el.innerHTML=pendingAntroMisure.map((m,i)=>`
+    <div class="fg" style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;position:relative">
+      <div class="fg-grp"><label class="lbl">Date</label><input class="inp" type="date" value="${m.date||''}" onchange="updateAntroMisura(${i},'date',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Weight (kg)</label><input class="inp" type="number" step="0.1" value="${m.peso||''}" onchange="updateAntroMisura(${i},'peso',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Height (m)</label><input class="inp" type="number" step="0.01" value="${m.altezza||''}" onchange="updateAntroMisura(${i},'altezza',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">BMI</label><input class="inp" type="text" value="${m.bmi||''}" readonly style="background:#F3F4F6"/></div>
+      <button type="button" class="ico-btn del btn-sm" style="position:absolute;top:6px;right:6px" onclick="removeAntroMisura(${i})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+const ANTRO_UNITS=['kg','cm','mm','%','bpm','sec','min','m','W','kg/cm²','—'];
+function addAntroTest(){
+  if(pendingAntroTest.length>=ANTRO_MAX){toast('Max '+ANTRO_MAX+' tests');return}
+  pendingAntroTest.push({test:'',date:'',unit:'',value:''});
+  renderAntroTest();
+}
+function removeAntroTest(i){pendingAntroTest.splice(i,1);renderAntroTest()}
+function updateAntroTest(i,field,val){pendingAntroTest[i][field]=val}
+function renderAntroTest(){
+  const el=document.getElementById('antro-test-list');
+  if(!el)return;
+  if(!pendingAntroTest.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:8px 0">No tests added</div>';return}
+  el.innerHTML=pendingAntroTest.map((t,i)=>`
+    <div class="fg" style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;position:relative">
+      <div class="fg-grp fg-full"><label class="lbl">Test</label><input class="inp" type="text" placeholder="e.g. CMJ, VO2max, Sprint 20m…" value="${t.test||''}" onchange="updateAntroTest(${i},'test',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Date</label><input class="inp" type="date" value="${t.date||''}" onchange="updateAntroTest(${i},'date',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Unit of measure</label>
+        <input class="inp" type="text" list="antro-units" placeholder="e.g. sec, cm, W…" value="${t.unit||''}" onchange="updateAntroTest(${i},'unit',this.value)"/>
+      </div>
+      <div class="fg-grp fg-full"><label class="lbl">Value</label><input class="inp" type="text" value="${t.value||''}" onchange="updateAntroTest(${i},'value',this.value)"/></div>
+      <button type="button" class="ico-btn del btn-sm" style="position:absolute;top:6px;right:6px" onclick="removeAntroTest(${i})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
 // DETAIL PANEL
 // ═══════════════════════════════════════════════
 function openPanel(id){
@@ -1068,6 +1383,12 @@ function openPanel(id){
     ${p.obiettivi?`<div class="p-sec"><div class="p-sec-title">Goals</div><div class="notes-box">${p.obiettivi}</div></div>`:''}
     ${p.anamnesi?`<div class="p-sec"><div class="p-sec-title">Sports History</div><div class="notes-box">${p.anamnesi}</div></div>`:''}
     ${p.note?`<div class="p-sec"><div class="p-sec-title">Clinical Notes</div><div class="notes-box">${p.note}</div></div>`:''}
+    ${p.antroMisure&&p.antroMisure.length?`<div class="p-sec"><div class="p-sec-title">Anthropometric Sessions</div>${p.antroMisure.map(m=>`
+      <div class="p-row"><span class="dk">${m.date?fmtDate(m.date):'—'}</span><span class="dv">${m.peso||'—'} kg · ${m.altezza||'—'} m · BMI ${m.bmi||'—'}</span></div>`).join('')}</div>`:''}
+    ${p.antroTest&&p.antroTest.length?`<div class="p-sec"><div class="p-sec-title">Test Sessions</div>${p.antroTest.map(t=>`
+      <div class="p-row"><span class="dk">${t.test||'—'} (${t.date?fmtDate(t.date):'—'})</span><span class="dv">${t.value||'—'} ${t.unit||''}</span></div>`).join('')}</div>`:''}
+    ${p.infortuni&&p.infortuni.length?`<div class="p-sec"><div class="p-sec-title">Injuries</div>${p.infortuni.map(inj=>`
+      <div class="p-row"><span class="dk">${inj.infortunio||'—'} (${inj.dataInizio?fmtDate(inj.dataInizio):'—'} → ${inj.dataFine?fmtDate(inj.dataFine):'—'})</span><span class="dv">${inj.durata||'—'} days</span></div>`).join('')}</div>`:''}
     ${p.allegati&&p.allegati.length?`<div class="p-sec"><div class="p-sec-title">Attachments (${p.allegati.length})</div>${p.allegati.map(a=>`
       <div class="attach-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
