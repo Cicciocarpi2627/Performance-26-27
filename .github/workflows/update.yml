@@ -34,9 +34,3 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
           git diff --staged --quiet || (git commit -m "Aggiornamento dati GPS" && git push)
-      - name: Commit e push se ci sono modifiche
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git diff --staged --quiet || (git commit -m "Aggiornamento dati GPS" && git push)
