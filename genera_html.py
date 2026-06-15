@@ -31,7 +31,7 @@ def round_value(col, val):
 
 
 def build_records(xlsx_path):
-    df = pd.read_excel(xlsx_path, sheet_name="Dati Giornalieri")
+    df = pd.read_excel(xlsx_path)
     df = df.dropna(axis=1, how="all")
     df = df.dropna(subset=["PLAYER", "D"])
     records = []
