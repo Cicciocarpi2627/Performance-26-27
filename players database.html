@@ -261,6 +261,7 @@ textarea.inp{resize:vertical;min-height:65px}
 .member-row input[type=checkbox]{width:15px;height:15px;accent-color:#C8102E;cursor:pointer}
 
 @media print{
+  @page{size:A4;margin:12mm 10mm}
   body{display:block}
   #sidebar,#topbar,.pag,#toast,.overlay:not(#modal-scheda-detail){display:none!important}
   #modal-scheda-detail{position:static!important;background:transparent!important;padding:0!important;display:block!important}
@@ -268,7 +269,10 @@ textarea.inp{resize:vertical;min-height:65px}
   .scheda-view{border:none!important;border-radius:0!important}
   .scheda-view-hd{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .exercise-card{break-inside:avoid;page-break-inside:avoid}
-  .es-img img{width:200px!important;height:200px!important;object-fit:cover!important}
+  .es-img img{width:72px!important;height:72px!important;object-fit:cover!important}
+  .es-img{height:72px!important;width:72px!important;flex-shrink:0!important}
+  .exercise-card{display:flex!important;flex-direction:row!important;align-items:stretch!important}
+  .es-body{flex:1!important}
   .es-link{display:none!important}
   #print-scheda-btn,#sch-del-btn,#sch-edit-btn,.btn-outline{display:none!important}
 }
@@ -1644,12 +1648,10 @@ ${html}
     const paz_obj=paz.find(x=>x.id===s.pazId)||{nome:'?',cognome:'?'};
     const exercisesHtml=(s.exercises||[]).map((e,i)=>`
       <div class="exercise-card">
-        <div class="es-img">
-          ${e.img?`<img src="${e.img}" alt="${e.nome}" style="width:200px;height:200px;object-fit:cover;display:block;margin:0 auto"/>`:''}
-        </div>
+        ${e.img?`<div class="es-img"><img src="${e.img}" alt="${e.nome}"/></div>`:''}
         <div class="es-body">
           <div class="es-name">${i+1}. ${e.nome}</div>
-          ${e.link?`<div style="margin-bottom:8px"><a href="${e.link}" style="font-size:11px;color:#C8102E;word-break:break-all;text-decoration:underline">${e.link}</a></div>`:''}
+          ${e.link?`<div style="margin-bottom:6px"><a href="${e.link}" style="font-size:10px;color:#C8102E;word-break:break-all;text-decoration:underline">${e.link}</a></div>`:''}
           ${e.desc?`<div class="es-desc">${e.desc}</div>`:''}
           <div class="es-params">
             ${e.serie?`<div class="es-param"><div class="es-param-val">${e.serie}</div><div class="es-param-lbl">Sets</div></div>`:''}
@@ -1661,34 +1663,37 @@ ${html}
       </div>`).join('');
 
     const printCSS=`
+      @page{size:A4;margin:12mm 10mm}
       *{box-sizing:border-box;margin:0;padding:0}
-      body{font-family:system-ui,sans-serif;font-size:13px;color:#0F172A}
-      #print-frame-inner{max-width:800px;margin:0 auto}
-      .scheda-view-hd{background:linear-gradient(135deg,#9B0000,#C8102E)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:22px 24px;color:#fff}
-      .scheda-view-hd .kicker{font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
-      .scheda-view-hd h3{font-size:20px;font-weight:700;margin-bottom:4px}
-      .scheda-view-hd p{font-size:12px;opacity:.8}
-      .info-grid{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #E2E6ED}
-      .info-cell{padding:12px 16px;border-right:1px solid #E2E6ED}.info-cell:last-child{border-right:none}
-      .ic-label{font-size:10px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
-      .ic-val{font-size:13px;font-weight:600}
-      .ob-grid{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #E2E6ED}
-      .ob-cell{padding:12px 16px;border-right:1px solid #E2E6ED}.ob-cell:last-child{border-right:none}
-      .ob-label{font-size:10px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
-      .ob-val{font-size:13px;font-weight:500}
-      .es-section{padding:16px 20px}
-      .es-section h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:12px}
-      .exercise-card{border:1px solid #E2E6ED;border-radius:8px;overflow:hidden;margin-bottom:10px;page-break-inside:avoid;break-inside:avoid}
-      .es-img{width:100%;height:200px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;overflow:hidden}
-      .es-body{padding:12px 14px}
-      .es-name{font-size:14px;font-weight:700;margin-bottom:6px}
-      .es-desc{font-size:12px;color:#64748B;margin-bottom:10px;line-height:1.5}
-      .es-params{display:flex;gap:20px}
+      html,body{width:100%;height:auto}
+      body{font-family:system-ui,sans-serif;font-size:12px;color:#0F172A}
+      #print-frame-inner{width:100%;max-width:100%;margin:0 auto}
+      .scheda-view-hd{background:linear-gradient(135deg,#9B0000,#C8102E)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:16px 18px;color:#fff;border-radius:6px}
+      .scheda-view-hd .kicker{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+      .scheda-view-hd h3{font-size:17px;font-weight:700;margin-bottom:3px}
+      .scheda-view-hd p{font-size:11px;opacity:.8}
+      .info-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #E2E6ED;border-top:none}
+      .info-cell{padding:8px 12px;border-right:1px solid #E2E6ED}.info-cell:last-child{border-right:none}
+      .ic-label{font-size:9px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+      .ic-val{font-size:12px;font-weight:600}
+      .ob-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #E2E6ED;border-top:none}
+      .ob-cell{padding:8px 12px;border-right:1px solid #E2E6ED}.ob-cell:last-child{border-right:none}
+      .ob-label{font-size:9px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+      .ob-val{font-size:12px;font-weight:500}
+      .es-section{padding:10px 0 0}
+      .es-section h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:8px}
+      .exercise-card{display:flex;align-items:stretch;gap:0;border:1px solid #E2E6ED;border-radius:6px;overflow:hidden;margin-bottom:6px;page-break-inside:avoid;break-inside:avoid}
+      .es-img{flex:0 0 72px;width:72px;height:72px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;overflow:hidden}
+      .es-img img{width:100%;height:100%;object-fit:cover;display:block}
+      .es-body{flex:1;min-width:0;padding:8px 10px}
+      .es-name{font-size:12px;font-weight:700;margin-bottom:3px}
+      .es-desc{font-size:10.5px;color:#64748B;margin-bottom:6px;line-height:1.4}
+      .es-params{display:flex;gap:14px}
       .es-param{text-align:center}
-      .es-param-val{font-size:16px;font-weight:700;color:#C8102E}
-      .es-param-lbl{font-size:10px;color:#64748B;text-transform:uppercase;letter-spacing:.4px}
-      .note-box{padding:12px 20px;border-bottom:1px solid #E2E6ED;font-size:13px;color:#64748B}
-      .footer-print{padding:12px 20px;border-top:1px solid #E2E6ED;font-size:11px;color:#94A3B8;display:flex;justify-content:space-between}
+      .es-param-val{font-size:13px;font-weight:700;color:#C8102E}
+      .es-param-lbl{font-size:8.5px;color:#64748B;text-transform:uppercase;letter-spacing:.4px}
+      .note-box{padding:8px 12px;border:1px solid #E2E6ED;border-top:none;font-size:12px;color:#64748B}
+      .footer-print{padding:8px 0 0;border-top:1px solid #E2E6ED;font-size:10px;color:#94A3B8;display:flex;justify-content:space-between;margin-top:6px}
       .es-link-block{display:none}
     `;
 
@@ -1729,7 +1734,7 @@ ${html}
     // inject print style
     let ps=document.getElementById('print-style');
     if(!ps){ps=document.createElement('style');ps.id='print-style';document.head.appendChild(ps);}
-    ps.textContent=`@media print{body>*:not(#print-frame){display:none!important}#print-frame{display:block!important;position:fixed;inset:0;background:#fff;z-index:9999;overflow:auto;padding:20px}${printCSS}}#print-frame{display:none}`;
+    ps.textContent=`@media print{html,body{margin:0!important;padding:0!important;height:auto!important;overflow:visible!important}body>*:not(#print-frame){display:none!important}#print-frame{display:block!important;position:static!important;background:#fff;padding:0;margin:0}${printCSS}}#print-frame{display:none}`;
 
     window.print();
   };
@@ -1790,6 +1795,13 @@ function addExercise(){
 
 function removeEs(i){exercises.splice(i,1);renderExercises()}
 
+function moveEs(i,dir){
+  const j=i+dir;
+  if(j<0||j>=exercises.length)return;
+  [exercises[i],exercises[j]]=[exercises[j],exercises[i]];
+  renderExercises();
+}
+
 function renderExercises(){
   const cont=document.getElementById('es-list');
   if(!exercises.length){
@@ -1800,9 +1812,17 @@ function renderExercises(){
     <div class="es-builder" id="esb-${i}">
       <div class="es-builder-top">
         <span class="es-builder-num">Exercise ${i+1}</span>
-        <button class="ico-btn del btn-sm" onclick="removeEs(${i})">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <div style="display:flex;gap:5px;align-items:center">
+          <button class="ico-btn btn-sm" title="Move up" ${i===0?'disabled style="opacity:.3;cursor:default"':''} onclick="moveEs(${i},-1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+          <button class="ico-btn btn-sm" title="Move down" ${i===exercises.length-1?'disabled style="opacity:.3;cursor:default"':''} onclick="moveEs(${i},1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+          </button>
+          <button class="ico-btn del btn-sm" onclick="removeEs(${i})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
       </div>
       <div class="fg" style="gap:10px">
         <div class="fg-grp fg-full"><label class="lbl">Exercise Name *</label><input class="inp inp-perf" value="${e.nome}" oninput="exercises[${i}].nome=this.value" placeholder="e.g. Back Squat"/></div>
