@@ -663,7 +663,7 @@ textarea.inp{resize:vertical;min-height:65px}
         <option value="kg"></option><option value="cm"></option><option value="mm"></option>
         <option value="%"></option><option value="bpm"></option><option value="sec"></option>
         <option value="min"></option><option value="m"></option><option value="W"></option>
-        <option value="kg/cm²"></option>
+        <option value="kg/cm²"></option><option value="mmol/l"></option>
       </datalist>
     </div>
 
@@ -683,6 +683,11 @@ textarea.inp{resize:vertical;min-height:65px}
       </div>
       <input type="file" id="attach-input" class="hidden" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleAttach(event)"/>
       <div class="attach-list" id="attach-list"></div>
+      <div class="p-sec-title" style="margin:16px 0 8px">Links</div>
+      <div class="fg-grp fg-full" style="margin-bottom:8px"><label class="lbl">Link 1</label><input class="inp" type="url" id="p-link1" placeholder="https://…"/></div>
+      <div class="fg-grp fg-full" style="margin-bottom:8px"><label class="lbl">Link 2</label><input class="inp" type="url" id="p-link2" placeholder="https://…"/></div>
+      <div class="fg-grp fg-full" style="margin-bottom:8px"><label class="lbl">Link 3</label><input class="inp" type="url" id="p-link3" placeholder="https://…"/></div>
+      <div class="fg-grp fg-full"><label class="lbl">Link 4</label><input class="inp" type="url" id="p-link4" placeholder="https://…"/></div>
     </div>
 
     <div class="modal-ft">
@@ -997,6 +1002,11 @@ function openModal(id){
     document.getElementById('p-obiettivi').value=p.obiettivi||'';
     document.getElementById('p-anamnesi').value=p.anamnesi||'';
     pendingAttach=p.allegati?[...p.allegati]:[];
+    const lk=p.links||[];
+    document.getElementById('p-link1').value=lk[0]||'';
+    document.getElementById('p-link2').value=lk[1]||'';
+    document.getElementById('p-link3').value=lk[2]||'';
+    document.getElementById('p-link4').value=lk[3]||'';
     pendingAntroMisure=p.antroMisure?p.antroMisure.map(m=>({...m})):[];
     pendingAntroTest=p.antroTest?p.antroTest.map(t=>({...t})):[];
     pendingInjury=p.infortuni?p.infortuni.map(t=>({...t})):[];
@@ -1012,6 +1022,10 @@ function openModal(id){
     document.getElementById('p-ruolo').value='';document.getElementById('p-ruolo-wrap').classList.add('hidden');
     document.getElementById('p-professione').value='';document.getElementById('p-obiettivi').value='';
     document.getElementById('p-anamnesi').value='';
+    document.getElementById('p-link1').value='';
+    document.getElementById('p-link2').value='';
+    document.getElementById('p-link3').value='';
+    document.getElementById('p-link4').value='';
     pendingAntroMisure=[];
     pendingAntroTest=[];
     pendingInjury=[];
@@ -1102,6 +1116,7 @@ function savePaz(){
     obiettivi:document.getElementById('p-obiettivi').value.trim(),
     anamnesi:document.getElementById('p-anamnesi').value.trim(),
     allegati:[...pendingAttach],
+    links:[document.getElementById('p-link1').value.trim(),document.getElementById('p-link2').value.trim(),document.getElementById('p-link3').value.trim(),document.getElementById('p-link4').value.trim()],
     antroMisure:pendingAntroMisure.map(m=>({...m})),
     antroTest:pendingAntroTest.map(t=>({...t})),
     infortuni:pendingInjury.map(t=>({...t})),
@@ -1191,8 +1206,8 @@ function renderAntroView(){
         <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Test Sessions</div>
         <div class="table-wrap" style="border-radius:8px">
           <table>
-            <thead><tr><th>Test</th><th>Date</th><th>Unit</th><th>Value</th></tr></thead>
-            <tbody>${test.map(t=>`<tr><td>${t.test||'—'}</td><td>${t.date?fmtDate(t.date):'—'}</td><td>${t.unit||'—'}</td><td>${t.value||'—'}</td></tr>`).join('')}</tbody>
+            <thead><tr><th>Test</th><th>Date</th><th>Unit</th><th>Value</th><th>Unit 2</th><th>Value 2</th><th>Unit 3</th><th>Value 3</th></tr></thead>
+            <tbody>${test.map(t=>`<tr><td>${t.test||'—'}</td><td>${t.date?fmtDate(t.date):'—'}</td><td>${t.unit||'—'}</td><td>${t.value||'—'}</td><td>${t.unit2||'—'}</td><td>${t.value2||'—'}</td><td>${t.unit3||'—'}</td><td>${t.value3||'—'}</td></tr>`).join('')}</tbody>
           </table>
         </div>
       </div>`:''}
@@ -1353,7 +1368,7 @@ function renderAntroMisure(){
 const ANTRO_UNITS=['kg','cm','mm','%','bpm','sec','min','m','W','kg/cm²','—'];
 function addAntroTest(){
   if(pendingAntroTest.length>=ANTRO_MAX){toast('Max '+ANTRO_MAX+' tests');return}
-  pendingAntroTest.push({test:'',date:'',unit:'',value:''});
+  pendingAntroTest.push({test:'',date:'',unit:'',value:'',unit2:'',value2:'',unit3:'',value3:''});
   renderAntroTest();
 }
 function removeAntroTest(i){pendingAntroTest.splice(i,1);renderAntroTest()}
@@ -1365,11 +1380,19 @@ function renderAntroTest(){
   el.innerHTML=pendingAntroTest.map((t,i)=>`
     <div class="fg" style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;position:relative">
       <div class="fg-grp fg-full"><label class="lbl">Test</label><input class="inp" type="text" placeholder="e.g. CMJ, VO2max, Sprint 20m…" value="${t.test||''}" onchange="updateAntroTest(${i},'test',this.value)"/></div>
-      <div class="fg-grp"><label class="lbl">Date</label><input class="inp" type="date" value="${t.date||''}" onchange="updateAntroTest(${i},'date',this.value)"/></div>
+      <div class="fg-grp fg-full"><label class="lbl">Date</label><input class="inp" type="date" value="${t.date||''}" onchange="updateAntroTest(${i},'date',this.value)"/></div>
       <div class="fg-grp"><label class="lbl">Unit of measure</label>
         <input class="inp" type="text" list="antro-units" placeholder="e.g. sec, cm, W…" value="${t.unit||''}" onchange="updateAntroTest(${i},'unit',this.value)"/>
       </div>
-      <div class="fg-grp fg-full"><label class="lbl">Value</label><input class="inp" type="text" value="${t.value||''}" onchange="updateAntroTest(${i},'value',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Value</label><input class="inp" type="text" value="${t.value||''}" onchange="updateAntroTest(${i},'value',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Unit of measure 2</label>
+        <input class="inp" type="text" list="antro-units" placeholder="e.g. sec, cm, W…" value="${t.unit2||''}" onchange="updateAntroTest(${i},'unit2',this.value)"/>
+      </div>
+      <div class="fg-grp"><label class="lbl">Value 2</label><input class="inp" type="text" value="${t.value2||''}" onchange="updateAntroTest(${i},'value2',this.value)"/></div>
+      <div class="fg-grp"><label class="lbl">Unit of measure 3</label>
+        <input class="inp" type="text" list="antro-units" placeholder="e.g. sec, cm, W…" value="${t.unit3||''}" onchange="updateAntroTest(${i},'unit3',this.value)"/>
+      </div>
+      <div class="fg-grp"><label class="lbl">Value 3</label><input class="inp" type="text" value="${t.value3||''}" onchange="updateAntroTest(${i},'value3',this.value)"/></div>
       <button type="button" class="ico-btn del btn-sm" style="position:absolute;top:6px;right:6px" onclick="removeAntroTest(${i})">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -1414,8 +1437,11 @@ function openPanel(id){
     ${p.note?`<div class="p-sec"><div class="p-sec-title">Clinical Notes</div><div class="notes-box">${p.note}</div></div>`:''}
     ${p.antroMisure&&p.antroMisure.length?`<div class="p-sec"><div class="p-sec-title">Anthropometric Sessions</div>${p.antroMisure.map(m=>`
       <div class="p-row"><span class="dk">${m.date?fmtDate(m.date):'—'}</span><span class="dv">${m.peso||'—'} kg · ${m.altezza||'—'} m · BMI ${m.bmi||'—'}</span></div>`).join('')}</div>`:''}
-    ${p.antroTest&&p.antroTest.length?`<div class="p-sec"><div class="p-sec-title">Test Sessions</div>${p.antroTest.map(t=>`
-      <div class="p-row"><span class="dk">${t.test||'—'} (${t.date?fmtDate(t.date):'—'})</span><span class="dv">${t.value||'—'} ${t.unit||''}</span></div>`).join('')}</div>`:''}
+    ${p.antroTest&&p.antroTest.length?`<div class="p-sec"><div class="p-sec-title">Test Sessions</div>${p.antroTest.map(t=>{
+      const pairs=[[t.value,t.unit],[t.value2,t.unit2],[t.value3,t.unit3]].filter(([v])=>v);
+      const dv=pairs.length?pairs.map(([v,u])=>`${v} ${u||''}`.trim()).join(' · '):'—';
+      return `<div class="p-row"><span class="dk">${t.test||'—'} (${t.date?fmtDate(t.date):'—'})</span><span class="dv">${dv}</span></div>`;
+    }).join('')}</div>`:''}
     ${p.infortuni&&p.infortuni.length?`<div class="p-sec"><div class="p-sec-title">Injuries</div>${p.infortuni.map(inj=>`
       <div class="p-row"><span class="dk">${inj.infortunio||'—'} (${inj.dataInizio?fmtDate(inj.dataInizio):'—'} → ${inj.dataFine?fmtDate(inj.dataFine):'—'})</span><span class="dv">${inj.durata||'—'} days</span></div>`).join('')}</div>`:''}
     ${p.allegati&&p.allegati.length?`<div class="p-sec"><div class="p-sec-title">Attachments (${p.allegati.length})</div>${p.allegati.map(a=>`
@@ -1427,6 +1453,8 @@ function openPanel(id){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </a>
       </div>`).join('')}</div>`:''}
+    ${p.links&&p.links.filter(l=>l).length?`<div class="p-sec"><div class="p-sec-title">Links</div>${p.links.filter(l=>l).map(l=>`
+      <div class="p-row"><a href="${l}" target="_blank" rel="noopener" style="color:var(--accent-osteo);word-break:break-all;text-decoration:underline">${l}</a></div>`).join('')}</div>`:''}
     <div class="p-sec">
       <div class="p-sec-title">Performance</div>
       <div class="p-row"><span class="dk">Training sessions</span><span class="dv">${numSchede}</span></div>
