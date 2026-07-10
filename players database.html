@@ -354,7 +354,7 @@ textarea.inp{resize:vertical;min-height:65px}
   </div>
   <div class="sb-item" id="nav-antro" onclick="setView('antro',this,'perf')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-    Antro
+    Antro/Test
   </div>
   <div class="sb-item" id="nav-injury" onclick="setView('injury',this,'perf')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/><path d="M3.22 8.5h3.5l1.5-2 2.5 5 1.5-2h3.5"/></svg>
@@ -412,7 +412,7 @@ textarea.inp{resize:vertical;min-height:65px}
       <div class="stats-row">
         <div class="stat-card"><div class="stat-label">Total</div><div class="stat-val" id="s-tot">0</div><div class="stat-tag tag-gray">players</div></div>
         <div class="stat-card"><div class="stat-label">Active</div><div class="stat-val" id="s-att">0</div><div class="stat-tag tag-green">active</div></div>
-        <div class="stat-card"><div class="stat-label">Waiting</div><div class="stat-val" id="s-wait">0</div><div class="stat-tag tag-yellow">on list</div></div>
+        <div class="stat-card"><div class="stat-label">Waiting/Injury</div><div class="stat-val" id="s-wait">0</div><div class="stat-tag tag-yellow">on list</div></div>
         <div class="stat-card"><div class="stat-label">Archived</div><div class="stat-val" id="s-arch">0</div><div class="stat-tag tag-gray">archived</div></div>
       </div>
 
@@ -421,7 +421,7 @@ textarea.inp{resize:vertical;min-height:65px}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="srch" placeholder="Search name, ID, sport…" oninput="renderTable()"/>
         </div>
-        <select class="fsel" id="f-stato" onchange="renderTable()"><option value="">All statuses</option><option>Active</option><option>Waiting</option><option>Archived</option></select>
+        <select class="fsel" id="f-stato" onchange="renderTable()"><option value="">All statuses</option><option>Active</option><option>Waiting/Injury</option><option>Archived</option></select>
         <select class="fsel" id="f-ctx" onchange="renderTable()"><option value="">All contexts</option><option value="performance">Performance</option><option value="performance">Performance</option><option value="both">Both</option></select>
         <select class="fsel" id="f-sex" onchange="renderTable()"><option value="">All</option><option value="M">M</option><option value="F">F</option></select>
       </div>
@@ -436,7 +436,7 @@ textarea.inp{resize:vertical;min-height:65px}
               <th onclick="srt('professione')">Profession</th>
               <th onclick="srt('telefono')">Phone</th>
               <th onclick="srt('stato')">Status</th>
-              <th onclick="srt('ultimaVisita')">Last Visit</th>
+              <th onclick="srt('ruolo')">Role</th>
               <th>Azioni</th>
             </tr>
           </thead>
@@ -492,7 +492,7 @@ textarea.inp{resize:vertical;min-height:65px}
     <div id="view-antro" class="view">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
         <div>
-          <h2 style="font-size:18px;font-weight:700">Antro</h2>
+          <h2 style="font-size:18px;font-weight:700">Antro/Test</h2>
           <p style="font-size:13px;color:var(--muted);margin-top:3px">Anthropometric measurements &amp; test sessions</p>
         </div>
         <select class="fsel" id="antro-filter-paz" onchange="renderAntroView()" style="max-width:260px">
@@ -576,7 +576,7 @@ textarea.inp{resize:vertical;min-height:65px}
     <div class="tabs" id="paz-tabs">
       <button class="tab on-osteo" onclick="pazTab(0,this)">Personal Info</button>
       <button class="tab" onclick="pazTab(1,this)">Context &amp; Sport</button>
-      <button class="tab" onclick="pazTab(2,this)">Antro</button>
+      <button class="tab" onclick="pazTab(2,this)">Antro/Test</button>
       <button class="tab" onclick="pazTab(3,this)">Injury</button>
       <button class="tab" onclick="pazTab(4,this)">Attachments</button>
     </div>
@@ -608,7 +608,7 @@ textarea.inp{resize:vertical;min-height:65px}
         <div class="fg-grp"><label class="lbl">Phone</label><input class="inp" id="p-tel" type="tel" placeholder="333 111 2222"/></div>
         <div class="fg-grp"><label class="lbl">Email</label><input class="inp" id="p-email" type="email" placeholder="mario@email.it"/></div>
         <div class="fg-grp fg-full"><label class="lbl">Address</label><input class="inp" id="p-indirizzo" placeholder="Via Roma 1, Milano"/></div>
-        <div class="fg-grp"><label class="lbl">Status</label><select class="inp" id="p-stato"><option>Active</option><option>Waiting</option><option>Archived</option></select></div>
+        <div class="fg-grp"><label class="lbl">Status</label><select class="inp" id="p-stato"><option>Active</option><option>Waiting/Injury</option><option>Archived</option></select></div>
         <div class="fg-grp"><label class="lbl">Last Visit</label><input class="inp" id="p-ultima" type="date"/></div>
         <div class="fg-grp fg-full"><label class="lbl">Clinical Notes</label><textarea class="inp" id="p-note" placeholder="Allergies, conditions, notes…"></textarea></div>
       </div>
@@ -814,7 +814,7 @@ function saveAll(){}
 var DEMO_PAZ=[
   {id:1,nome:'Mario',cognome:'Rossi',dataNascita:'1985-03-12',sesso:'M',codiceFiscale:'RSSMRA85C12H501A',telefono:'333 111 2222',email:'mario.rossi@email.it',indirizzo:'Via Roma 10, Milano',contesto:'performance',sport:'Soccer',livello:'Agonista',professione:'Imprenditore',stato:'Active',ultimaVisita:'2026-05-20',note:'Ipertensione lieve.',obiettivi:'Prevenzione infortuni e miglioramento performance',anamnesi:'Lesione LCA 2019, operato.',allegati:[]},
   {id:2,nome:'Giulia',cognome:'Bianchi',dataNascita:'1993-07-22',sesso:'F',codiceFiscale:'BNCGLI93L62H501B',telefono:'347 444 5555',email:'g.bianchi@gmail.com',indirizzo:'Via Garibaldi 5, Roma',contesto:'performance',sport:'',livello:'',professione:'Insegnante',stato:'Active',ultimaVisita:'2026-04-30',note:'Allergia alla penicillina.',obiettivi:'Ridurre dolore cervicale',anamnesi:'',allegati:[]},
-  {id:3,nome:'Luca',cognome:'Verdi',dataNascita:'1990-11-05',sesso:'M',codiceFiscale:'VRDLCU90S05H501C',telefono:'320 777 8888',email:'',indirizzo:'Corso Italia 8, Torino',contesto:'performance',sport:'Triathlon',livello:'Amatoriale',professione:'Ingegnere',stato:'Waiting',ultimaVisita:'',note:'',obiettivi:'Completare Ironman 70.3',anamnesi:'',allegati:[]},
+  {id:3,nome:'Luca',cognome:'Verdi',dataNascita:'1990-11-05',sesso:'M',codiceFiscale:'VRDLCU90S05H501C',telefono:'320 777 8888',email:'',indirizzo:'Corso Italia 8, Torino',contesto:'performance',sport:'Triathlon',livello:'Amatoriale',professione:'Ingegnere',stato:'Waiting/Injury',ultimaVisita:'',note:'',obiettivi:'Completare Ironman 70.3',anamnesi:'',allegati:[]},
 ];
 var DEMO_SCH=[
   {id:1,pazId:1,data:'2026-05-20',giorno:'Tuesday',seduta:'Morning',ciclo:'In Season',obGen:'Sviluppo forza massimale',obSpec:'Squat 5x5 @80%',obForza:'Incremento 5% 1RM squat',pct1rm:'80',note:'Riscaldamento 10min bici stazionaria.',exercises:[
@@ -834,7 +834,7 @@ function setView(v,el,ctx){
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active-osteo','active-perf'));
   if(el)el.classList.add(ctx==='osteo'?'active-osteo':'active-perf');
   document.getElementById('topbar-title').textContent=
-    v==='pazienti'?'Players':v==='gruppi'?'Groups':v==='performance'?'Performance':v==='antro'?'Antro':v==='injury'?'Injury':'Import Dati';
+    v==='pazienti'?'Players':v==='gruppi'?'Groups':v==='performance'?'Performance':v==='antro'?'Antro/Test':v==='injury'?'Injury':'Import Dati';
   const pill=document.getElementById('ctx-pill');
   const addBtn=document.getElementById('topbar-add');
   if(v==='performance'){
@@ -867,7 +867,7 @@ function setView(v,el,ctx){
 function updateStats(){
   document.getElementById('s-tot').textContent=paz.length;
   document.getElementById('s-att').textContent=paz.filter(p=>p.stato==='Active').length;
-  document.getElementById('s-wait').textContent=paz.filter(p=>p.stato==='Waiting').length;
+  document.getElementById('s-wait').textContent=paz.filter(p=>p.stato==='Waiting/Injury'||p.stato==='Waiting').length;
   document.getElementById('s-arch').textContent=paz.filter(p=>p.stato==='Archived').length;
 }
 
@@ -885,7 +885,7 @@ function getFiltered(){
   return paz.filter(p=>{
     const s=`${p.nome} ${p.cognome} ${p.codiceFiscale||''} ${p.sport||''} ${p.professione||''}`.toLowerCase();
     const gruppoOk=!window._gruppoFiltro||window._gruppoFiltro.includes(p.id);
-    return(!q||s.includes(q))&&(!st||p.stato===st)&&(!ctx||p.contesto===ctx)&&(!sx||p.sesso===sx)&&gruppoOk;
+    return(!q||s.includes(q))&&(!st||p.stato===st||(st==='Waiting/Injury'&&p.stato==='Waiting'))&&(!ctx||p.contesto===ctx)&&(!sx||p.sesso===sx)&&gruppoOk;
   }).sort((a,b)=>{
     const av=(a[sortK]||'').toString().toLowerCase();
     const bv=(b[sortK]||'').toString().toLowerCase();
@@ -911,7 +911,7 @@ function renderTable(){
   tb.innerHTML=sl.map(p=>{
     const ini=(p.nome[0]||'')+(p.cognome[0]||'');
     const c=col(p.id);
-    const sb=p.stato==='Active'?'tag-green':p.stato==='Waiting'?'tag-yellow':'tag-gray';
+    const sb=p.stato==='Active'?'tag-green':(p.stato==='Waiting/Injury'||p.stato==='Waiting')?'tag-yellow':'tag-gray';
     const ctx=ctxLabel[p.contesto]||'';
     const hasPerf=p.contesto==='performance'||p.contesto==='both';
     return`<tr>
@@ -924,7 +924,7 @@ function renderTable(){
       <td>${p.professione||'—'}</td>
       <td>${p.telefono||'—'}</td>
       <td><span class="stat-tag ${sb}">${p.stato}</span></td>
-      <td>${p.ultimaVisita?fmtDate(p.ultimaVisita):'—'}</td>
+      <td>${p.ruolo||'—'}</td>
       <td><div class="act-cell">
         <button class="ico-btn" title="Dettaglio" onclick="openPanel(${p.id})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -1383,7 +1383,7 @@ function openPanel(id){
   const p=paz.find(x=>x.id===id);
   const c=col(p.id);
   const ini=(p.nome[0]||'')+(p.cognome[0]||'');
-  const sb=p.stato==='Active'?'tag-green':p.stato==='Waiting'?'tag-yellow':'tag-gray';
+  const sb=p.stato==='Active'?'tag-green':(p.stato==='Waiting/Injury'||p.stato==='Waiting')?'tag-yellow':'tag-gray';
   const numSchede=schede.filter(s=>s.pazId===id).length;
   document.getElementById('det-content').innerHTML=`
     ${p.foto?`<div style="margin-bottom:10px"><img src="${p.foto}" style="width:100px;height:100px;object-fit:cover;border-radius:12px;border:2px solid var(--border)"/></div>`:`<div class="p-av" style="background:${c}">${ini.toUpperCase()}</div>`}
