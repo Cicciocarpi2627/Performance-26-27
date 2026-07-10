@@ -920,7 +920,7 @@ function renderTable(){
     return`<tr>
       <td><div class="cell-name">
         <div class="avatar" style="background:${c}">${ini.toUpperCase()}</div>
-        <div><div class="name-main">${p.cognome} ${p.nome}</div><div class="name-sub">${p.codiceFiscale||'—'}</div></div>
+        <div><div class="name-main">${p.cognome} ${p.nome}</div><div class="name-sub">${p.dataNascita?fmtDate(p.dataNascita):'—'}</div></div>
       </div></td>
       <td>${ctx}</td>
       <td>${p.sport||'—'}</td>
