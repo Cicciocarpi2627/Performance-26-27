@@ -422,7 +422,7 @@ textarea.inp{resize:vertical;min-height:65px}
           <input type="text" id="srch" placeholder="Search name, ID, sport…" oninput="renderTable()"/>
         </div>
         <select class="fsel" id="f-stato" onchange="renderTable()"><option value="">All statuses</option><option>Active</option><option>Waiting/Injury</option><option>Archived</option></select>
-        <select class="fsel" id="f-ctx" onchange="renderTable()"><option value="">All contexts</option><option value="performance">Performance</option><option value="performance">Performance</option><option value="both">Both</option></select>
+        <select class="fsel" id="f-ctx" onchange="renderTable()"><option value="">All contexts</option><option value="performance">Performance</option></select>
         <select class="fsel" id="f-sex" onchange="renderTable()"><option value="">All</option><option value="M">M</option><option value="F">F</option></select>
       </div>
 
@@ -621,8 +621,6 @@ textarea.inp{resize:vertical;min-height:65px}
           <label class="lbl">Context *</label>
           <select class="inp" id="p-contesto">
             <option value="performance">Performance</option>
-            <option value="performance">Performance</option>
-            <option value="both">Both</option>
           </select>
         </div>
         <div class="fg-grp fg-full"><label class="lbl">Sport</label>
@@ -900,7 +898,7 @@ function getFiltered(){
 
 function srt(k){if(sortK===k)sortD*=-1;else{sortK=k;sortD=1}renderTable()}
 
-const ctxLabel={performance:'<span class="stat-tag tag-teal" style="font-size:10px">Performance</span>',performance:'<span class="stat-tag tag-purple" style="font-size:10px">Performance</span>',both:'<span class="stat-tag tag-teal" style="font-size:10px">Perf</span> <span class="stat-tag tag-purple" style="font-size:10px">Perf</span>'};
+const ctxLabel={performance:'<span class="stat-tag tag-purple" style="font-size:10px">Performance</span>'};
 
 function renderTable(){
   updateStats();
