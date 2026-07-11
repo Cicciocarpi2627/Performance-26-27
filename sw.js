@@ -5,9 +5,9 @@ const CACHE_NAME = 'ac-carpi-v1';
 
 const APP_SHELL = [
   './',
-  './index.html',
+  './players%20database.html',
   './training-log.html',
-  './players_database.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -48,7 +48,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
           return res;
         })
-        .catch(() => caches.match(req).then((res) => res || caches.match('./index.html')))
+        .catch(() => caches.match(req).then((res) => res || caches.match('./players%20database.html')))
     );
     return;
   }

@@ -2,7 +2,7 @@
   "name": "A.C. Carpi",
   "short_name": "A.C. Carpi",
   "description": "GPS Dashboard, Training Log, Players Database",
-  "start_url": "./index.html",
+  "start_url": "./players%20database.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
