@@ -26,6 +26,7 @@ INT_COLS = {
     "nDA>2", "nDA>3", "nDD<-2", "nDD<-3",
 }
 EXCEL_ERRORS = {"#REF!", "#VALUE!", "#DIV/0!", "#N/A", "#NULL!", "#NUM!", "#NAME?"}
+TEXT_COLS = {"PLAYER", "SESSION TYPE", "AM/PM"}
 def round_value(col, val):
     if pd.isna(val):
         return None
@@ -33,6 +34,8 @@ def round_value(col, val):
         return None
     if col == "DATA":
         return val.strftime("%Y-%m-%d") if hasattr(val, "strftime") else str(val)
+    if col in TEXT_COLS:
+        return val
     if col in INT_COLS:
         try:
             return int(val)
