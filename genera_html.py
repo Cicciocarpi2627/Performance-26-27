@@ -25,20 +25,48 @@ INT_COLS = {
     "nD>16", "nD>20", "nD>25", "nD>30",
     "nDA>2", "nDA>3", "nDD<-2", "nDD<-3",
 }
+EXCEL_ERRORS = {"#REF!", "#VALUE!", "#DIV/0!", "#N/A", "#NULL!", "#NUM!", "#NAME?"}
 def round_value(col, val):
     if pd.isna(val):
+        return None
+    if isinstance(val, str) and val.strip().upper() in EXCEL_ERRORS:
         return None
     if col == "DATA":
         return val.strftime("%Y-%m-%d") if hasattr(val, "strftime") else str(val)
     if col in INT_COLS:
-        return int(val)
+        try:
+            return int(val)
+        except (ValueError, TypeError):
+            return None
     if isinstance(val, float):
         return round(val, 1)
+    if isinstance(val, str):
+        try:
+            return round(float(val), 1)
+        except (ValueError, TypeError):
+            return None
     return val
 def build_records(xlsx_path):
     df = pd.read_excel(xlsx_path)
     df = df.dropna(axis=1, how="all")
     print("Colonne trovate:", list(df.columns))  # debug temporaneo
+
+    # Segnala eventuali errori Excel (#REF!, #VALUE!, ecc.) trovati nel file,
+    # cosi' si sa subito quale riga correggere alla fonte invece di scoprirlo da un crash.
+    error_cells = []
+    for col in COLS:
+        if col not in df.columns:
+            continue
+        mask = df[col].apply(lambda v: isinstance(v, str) and v.strip().upper() in EXCEL_ERRORS)
+        for idx in df[mask].index:
+            player = df.at[idx, "PLAYER"] if "PLAYER" in df.columns else "?"
+            date = df.at[idx, "DATA"] if "DATA" in df.columns else "?"
+            error_cells.append(f"  - {date} | {player} | colonna '{col}' = {df.at[idx, col]!r}")
+    if error_cells:
+        print(f"ATTENZIONE: trovati {len(error_cells)} valori con errore Excel (verranno trattati come vuoti):")
+        for line in error_cells:
+            print(line)
+
     records = []
     for _, row in df.iterrows():
         rec = {}
