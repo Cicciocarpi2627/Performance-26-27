@@ -1,0 +1,34 @@
+Copyright (c) 2026 [Il tuo nome/azienda]
+
+Tutti i diritti riservati.
+
+Il presente codice sorgente, inclusi tutti i file, gli script, gli stili,
+le immagini e i contenuti ad esso associati (di seguito "l'Opera"),
+è protetto dalle leggi sul diritto d'autore vigenti in Italia
+(L. 633/1941 e successive modifiche) e dalle convenzioni internazionali
+sul copyright (Convenzione di Berna).
+
+È espressamente vietato, salvo autorizzazione scritta del titolare
+dei diritti:
+
+  - copiare, riprodurre o distribuire l'Opera, in tutto o in parte;
+  - modificare, adattare o creare opere derivate a partire dall'Opera;
+  - utilizzare l'Opera, in tutto o in parte, per scopi commerciali;
+  - decompilare, decodificare o tentare di estrarre il codice sorgente
+    da versioni compilate o minificate dell'Opera;
+  - rimuovere o alterare le note di copyright presenti nel codice.
+
+Qualsiasi uso non autorizzato costituisce violazione del diritto
+d'autore e può comportare azioni legali ai sensi della normativa
+vigente.
+
+Per richieste di licenza d'uso, collaborazione o autorizzazioni
+specifiche, contattare:
+
+  graziano araldi
+  grazianoaraldi@pec.it
+  
+
+---
+
+Data di prima pubblicazione: [22/07/2026]
