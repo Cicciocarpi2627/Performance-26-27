@@ -1,12 +1,20 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title>https://github.com/Cicciocarpi2627</title>
-</head>
-<body>
+<!--
+  ============================================================
+  © 2026 [graziano araldi]. Tutti i diritti riservati.
 
-  <!-- ... contenuto della pagina ... -->
+  Questo codice sorgente e i contenuti in esso presenti sono
+  protetti dalle leggi sul diritto d'autore (L. 633/1941 e succ.
+  mod.) e dalle convenzioni internazionali sul copyright.
+
+  È vietata la riproduzione, distribuzione, modifica o l'uso,
+  anche parziale, senza autorizzazione scritta del titolare.
+
+  Autore:            graziano araldi
+  Contatto:           grazianoaraldi@pec.it
+  Prima pubblicazione: 22/07/2026
+  Progetto:            Players Database
+  ============================================================
+-->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -847,6 +855,14 @@ textarea.inp{resize:vertical;min-height:65px}
 
 <div id="toast"></div>
 </div> <!-- /app-root -->
+
+<footer style="text-align:center;padding:16px;font-size:11px;color:var(--text2);">
+  &copy; <span id="copyYear"></span> [Il tuo nome/azienda]. Tutti i diritti riservati.
+</footer>
+
+<script>
+document.getElementById('copyYear').textContent = new Date().getFullYear();
+</script>
 
 <script>
 // ═══════════════════════════════════════════════
@@ -2493,17 +2509,5 @@ window.cloudDeleteFolder = async function(id){
     });
   }
 </script>
-   <footer>
-    <p>&copy; <span id="year"></span> [graziano araldi]. Tutti i diritti riservati.</p>
-  </footer>
-
-  <script>
-    // Aggiorna automaticamente l'anno nel footer
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
-
-</body>
-</html>
-
 </body>
 </html>
