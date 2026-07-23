@@ -122,7 +122,7 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
 
 /* KPI TOGGLES */
 .kpi-toggles{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
-.kpi-tog{padding:5px 11px;border-radius:14px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:all .15s;user-select:none;}
+.kpi-tog{font-family:'DM Sans',sans-serif;padding:5px 11px;border-radius:14px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:all .15s;user-select:none;}
 .kpi-tog.on{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
 
 /* Gruppi KPI colorati (Team Staff) - separati come nel file .xls da linee doppie */
@@ -142,6 +142,26 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
 .kpi-tog.grp6.on{background:#059669;border-color:#059669;color:#fff;}
 .kpi-tog.grp7{background:#F3F4F6;border-color:#D1D5DB;color:#374151;}
 .kpi-tog.grp7.on{background:#374151;border-color:#374151;color:#fff;}
+
+.kpi-group-fields{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);position:relative;}
+.kpi-group-field{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1;position:relative;}
+.kpi-group-field label{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;}
+.kpi-ms-btn{font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 10px;border-radius:6px;background:var(--bg2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px;user-select:none;}
+.kpi-ms-btn .kpi-ms-summary{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.kpi-ms-btn .kpi-ms-arrow{flex-shrink:0;font-size:10px;color:var(--text2);transition:transform .15s;}
+.kpi-ms-btn.open .kpi-ms-arrow{transform:rotate(180deg);}
+.kpi-ms-panel{display:none;position:absolute;top:100%;left:0;right:0;margin-top:4px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50;max-height:240px;overflow-y:auto;padding:6px;}
+.kpi-ms-panel.open{display:block;}
+.kpi-ms-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;}
+.kpi-ms-opt:hover{background:var(--bg3);}
+.kpi-ms-opt input{margin:0;cursor:pointer;}
+.kpi-group-field.grp1 label{color:#1D4ED8;} .kpi-group-field.grp1 .kpi-ms-btn{border:1.5px solid #BFDBFE;}
+.kpi-group-field.grp2 label{color:#7C3AED;} .kpi-group-field.grp2 .kpi-ms-btn{border:1.5px solid #DDD6FE;}
+.kpi-group-field.grp3 label{color:#DC2626;} .kpi-group-field.grp3 .kpi-ms-btn{border:1.5px solid #FECACA;}
+.kpi-group-field.grp4 label{color:#D97706;} .kpi-group-field.grp4 .kpi-ms-btn{border:1.5px solid #FDE68A;}
+.kpi-group-field.grp5 label{color:#0891B2;} .kpi-group-field.grp5 .kpi-ms-btn{border:1.5px solid #A5F3FC;}
+.kpi-group-field.grp6 label{color:#059669;} .kpi-group-field.grp6 .kpi-ms-btn{border:1.5px solid #A7F3D0;}
+.kpi-group-field.grp7 label{color:#374151;} .kpi-group-field.grp7 .kpi-ms-btn{border:1.5px solid #D1D5DB;}
 
 .ratio-bar{display:inline-block;height:5px;border-radius:3px;vertical-align:middle;margin-left:5px;}
 
@@ -220,7 +240,7 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
       <div class="filter-group"><label>Aggregazione</label><div class="mode-tabs"><button class="mode-tab active" id="tAggS" onclick="tSetAgg('sum')">Somma</button><button class="mode-tab" id="tAggA" onclick="tSetAgg('avg')">Media</button></div></div>
       <div class="filter-group"><label>DIFF</label><select id="tDiff" onchange="tRefresh()"><option value="all">Tutti</option><option value="no">No diff</option><option value="yes">Solo diff</option></select></div>
     </div>
-    <div class="kpi-toggles" id="tKpiTog"></div>
+    <div class="kpi-group-fields" id="tKpiTog"></div>
   </div>
   <div class="cards-row" id="tCards"></div>
   <div class="table-wrap"><div class="tw-header"><h3 id="tTblTitle">Riepilogo Squadra</h3><span class="info" id="tTblInfo"></span></div><div style="overflow-x:auto;max-height:600px;overflow-y:auto;"><table class="dt" id="tMainTbl"></table></div></div>
@@ -469,16 +489,51 @@ function tInit(){
   const TEAM_HIDDEN_GROUPS=[5,6]; // 5=Norm.(nD/nDD) 6=TL GPS(TLGP) — hidden on Team page, still available on Team Staff
   const TEAM_HIDDEN_KPIS=['FC rip','FCmax']; // singole KPI nascoste solo su Team, restano su Team Staff
   const tHidden=(k,i)=>TEAM_HIDDEN_GROUPS.includes(KPI_GROUP[i])||TEAM_HIDDEN_KPIS.includes(k);
-  KPIS.forEach((k,i)=>{
-    if(tHidden(k,i))return;
-    const grp=KPI_GROUP[i];
-    const d=document.createElement('div');
-    let j=i+1;while(j<KPIS.length&&tHidden(KPIS[j],j))j++;
-    const isEnd=j>=KPIS.length||KPI_GROUP[j]!==grp;
-    d.className='kpi-tog grp'+grp+(tActKPI.has(k)?' on':'')+(isEnd?' grp-end':'');
-    d.textContent=kpiLabel(k);
-    d.onclick=()=>{if(tActKPI.has(k)){tActKPI.delete(k);d.classList.remove('on');}else{tActKPI.add(k);d.classList.add('on');}tRefresh();};
-    tog.appendChild(d);
+  const GROUP_NAMES={1:'Carico',2:'FC',3:'Distanza',4:'Acc/Dec',5:'Norm.',6:'TL GPS',7:'Smax'};
+  const byGroup={};
+  KPIS.forEach((k,i)=>{if(tHidden(k,i))return;const g=KPI_GROUP[i];(byGroup[g]=byGroup[g]||[]).push(k);});
+  tog.innerHTML='';
+  function summaryText(list){
+    const sel=list.filter(k=>tActKPI.has(k));
+    if(!sel.length)return'Nessuna selezionata';
+    if(sel.length===list.length)return'Tutte ('+sel.length+')';
+    return sel.map(kpiLabel).join(', ');
+  }
+  Object.keys(byGroup).forEach(g=>{
+    const list=byGroup[g];
+    const field=document.createElement('div');
+    field.className='kpi-group-field grp'+g;
+    const label=document.createElement('label');
+    label.textContent=GROUP_NAMES[g];
+    const btn=document.createElement('div');
+    btn.className='kpi-ms-btn';
+    btn.innerHTML=`<span class="kpi-ms-summary">${summaryText(list)}</span><span class="kpi-ms-arrow">▾</span>`;
+    const panel=document.createElement('div');
+    panel.className='kpi-ms-panel';
+    list.forEach(k=>{
+      const opt=document.createElement('label');
+      opt.className='kpi-ms-opt';
+      const cb=document.createElement('input');
+      cb.type='checkbox';
+      cb.checked=tActKPI.has(k);
+      cb.onchange=()=>{
+        if(cb.checked)tActKPI.add(k);else tActKPI.delete(k);
+        btn.querySelector('.kpi-ms-summary').textContent=summaryText(list);
+        tRefresh();
+      };
+      opt.appendChild(cb);
+      opt.appendChild(document.createTextNode(kpiLabel(k)));
+      panel.appendChild(opt);
+    });
+    btn.onclick=(e)=>{
+      e.stopPropagation();
+      const wasOpen=panel.classList.contains('open');
+      document.querySelectorAll('.kpi-ms-panel.open').forEach(p=>p.classList.remove('open'));
+      document.querySelectorAll('.kpi-ms-btn.open').forEach(b=>b.classList.remove('open'));
+      if(!wasOpen){panel.classList.add('open');btn.classList.add('open');}
+    };
+    field.appendChild(label);field.appendChild(btn);field.appendChild(panel);
+    tog.appendChild(field);
   });
   const cs=document.getElementById('tChartKPI');
   KPIS.forEach((k,i)=>{if(!tHidden(k,i))cs.innerHTML+=`<option value="${k}">${kpiLabel(k)}</option>`;});
@@ -772,6 +827,13 @@ function relRefresh(){
 }
 let relSortC='n',relSortD='desc';
 function relSort(c){if(relSortC===c)relSortD=relSortD==='asc'?'desc':'asc';else{relSortC=c;relSortD='desc';}relRefresh();}
+
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.kpi-group-field')){
+    document.querySelectorAll('.kpi-ms-panel.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.kpi-ms-btn.open').forEach(b=>b.classList.remove('open'));
+  }
+});
 
 // ===== BOOT =====
 pInit();tInit();tsInit();
