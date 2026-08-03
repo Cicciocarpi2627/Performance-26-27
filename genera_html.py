@@ -20,6 +20,11 @@ COLS = [
     "TLGPSL", "TLGPSM", "TLGPSH", "TLGPST",
     "Vmax", "Amax", "Dmax",
 ]
+# Se una colonna viene rinominata nel file Excel di origine, basta aggiungere una riga qui
+# (nome nuovo nel file : nome che la dashboard si aspetta) invece di modificare tutto il resto.
+COLUMN_ALIASES = {
+    "HOOPER": "TQR",  # la colonna TQR e' stata rinominata "Hooper" nel foglio Excel
+}
 INT_COLS = {
     "WEEK", "NEXT MD", "DIFF", "TQR", "sRPE",
     "nD>16", "nD>20", "nD>25", "nD>30",
@@ -52,6 +57,12 @@ def round_value(col, val):
 def build_records(xlsx_path):
     df = pd.read_excel(xlsx_path)
     df = df.dropna(axis=1, how="all")
+    # Applica gli alias: se il file usa un nome nuovo per una colonna (es. "HOOPER"
+    # al posto di "TQR"), la rinomina qui cosi' tutto il resto del codice funziona invariato.
+    rename_map = {src: dst for src, dst in COLUMN_ALIASES.items() if src in df.columns and dst not in df.columns}
+    if rename_map:
+        df = df.rename(columns=rename_map)
+        print("Colonne rinominate tramite alias:", rename_map)
     print("Colonne trovate:", list(df.columns))  # debug temporaneo
 
     # Segnala eventuali errori Excel (#REF!, #VALUE!, ecc.) trovati nel file,
