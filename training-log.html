@@ -484,6 +484,10 @@
       <button id="closeInjuryModal">&times;</button>
     </div>
     <div class="modal-body">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="i_name" placeholder="Player name">
+      </div>
       <div class="field-row">
         <div class="field">
           <label>Date</label>
@@ -512,6 +516,7 @@
     </div>
     <div class="modal-foot">
       <button class="btn btn-del" id="deleteInjuryBtn" style="display:none;">Delete</button>
+      <button class="btn btn-cancel" id="copyInjuryBtn" style="display:none;">Copy</button>
       <div style="display:flex; gap:10px; margin-left:auto;">
         <button class="btn btn-cancel" id="cancelInjuryBtn">Cancel</button>
         <button class="btn btn-save" id="saveInjuryBtn">Save injury</button>
@@ -866,6 +871,7 @@
         <div class="injury-card-top">
           <span class="injury-card-date">${fmtDate(inj.date)} · ${inj.session==='AM'?'Morning':'Afternoon'}</span>
         </div>
+        ${inj.name ? `<div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-top:2px;">${escapeHtml(inj.name)}</div>` : ''}
         <div class="injury-card-type">${escapeHtml(inj.type||'Untitled injury')}</div>
         ${inj.program ? `<div class="injury-card-program">${escapeHtml(inj.program)}</div>` : ''}
       </div>
@@ -893,10 +899,13 @@
   function openInjuryModal(id){
     editingInjuryId = id || null;
     const deleteInjuryBtn = document.getElementById('deleteInjuryBtn');
+    const copyInjuryBtn = document.getElementById('copyInjuryBtn');
     if(id){
       const inj = injuries.find(x=>x.id===id);
       document.getElementById('injuryModalTitle').textContent = 'Edit Injury';
       deleteInjuryBtn.style.display='inline-block';
+      copyInjuryBtn.style.display='inline-block';
+      document.getElementById('i_name').value = inj.name||'';
       document.getElementById('i_date').value = inj.date||'';
       currentInjurySession = inj.session||'AM';
       document.getElementById('i_type').value = inj.type||'';
@@ -905,6 +914,8 @@
     } else {
       document.getElementById('injuryModalTitle').textContent = 'New Injury';
       deleteInjuryBtn.style.display='none';
+      copyInjuryBtn.style.display='none';
+      document.getElementById('i_name').value = '';
       document.getElementById('i_date').value = toISO(new Date());
       currentInjurySession = 'AM';
       document.getElementById('i_type').value = '';
@@ -921,11 +932,20 @@
   document.getElementById('cancelInjuryBtn').addEventListener('click', closeInjuryModal);
   injuryOverlay.addEventListener('click', (e)=>{ if(e.target===injuryOverlay) closeInjuryModal(); });
 
+  // "Copy": duplicates the current form as a brand-new injury record (keeps the original untouched).
+  document.getElementById('copyInjuryBtn').addEventListener('click', ()=>{
+    editingInjuryId = null;
+    document.getElementById('injuryModalTitle').textContent = 'New Injury (copy)';
+    document.getElementById('deleteInjuryBtn').style.display='none';
+    document.getElementById('copyInjuryBtn').style.display='none';
+  });
+
   document.getElementById('saveInjuryBtn').addEventListener('click', async ()=>{
     const date = document.getElementById('i_date').value;
     if(!date){ document.getElementById('i_date').focus(); return; }
     const data = {
       id: editingInjuryId || (Date.now().toString(36)+Math.random().toString(36).slice(2,7)),
+      name: document.getElementById('i_name').value,
       date, session: currentInjurySession,
       type: document.getElementById('i_type').value,
       program: document.getElementById('i_program').value,
