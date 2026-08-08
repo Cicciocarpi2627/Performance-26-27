@@ -95,6 +95,7 @@ table.dt td.exname{font-weight:600;}
     <div class="filter-group"><label>Giocatore</label><select id="sPlayer" onchange="sOnPlayerChange()"></select></div>
     <div class="filter-group"><label>Settimana</label><select id="sWeek" onchange="sOnWeekChange()"></select></div>
     <div class="filter-group"><label>Giorno</label><select id="sDay" onchange="sRefresh()"></select></div>
+    <div class="filter-group"><label>Categoria</label><select id="sCategory" onchange="sRefresh()"><option value="">Tutte</option><option value="HIP DOMINANT">Hip Dominant</option><option value="SQUAT PATTERN">Squat Pattern</option><option value="LUNGE PATTERN">Lunge Pattern</option><option value="MACHINE">Machine</option><option value="POWER/OLYMPIC">Power/Olympic</option></select></div>
   </div>
 
   <div class="cards-row" id="sCards"></div>
@@ -126,6 +127,35 @@ const EXERCISES = [
   "Hang Clean","Hang Snatch","High Pull","Push Press","Push Jerk","Thruster","Swing",
   "Wall/Slam Ball"
 ];
+
+// Categoria per esercizio: non ancora presente nel file Excel di origine, quindi mappata qui
+// lato client. Quando la colonna "Categoria" verra' aggiunta al foglio, questa mappa andra'
+// sostituita leggendo il valore direttamente dal dato (bastera' togliere questo oggetto e
+// filtrare su row.Categoria invece che su EXERCISE_CATEGORY[ex]).
+const EXERCISE_CATEGORY = {
+  "Deadlift":"HIP DOMINANT","Romanian Deadlift (RDL)":"HIP DOMINANT","Rack Pull":"HIP DOMINANT",
+  "Sumo Deadlift":"HIP DOMINANT","TrapBar Deadlift":"HIP DOMINANT","Single Leg Deadlift (SLDL)":"HIP DOMINANT",
+  "Single Leg Romanian Deadlift":"HIP DOMINANT","Goog Morning":"HIP DOMINANT","Hip Thrust":"HIP DOMINANT",
+  "SL Hip Thrust":"HIP DOMINANT","American Swing":"HIP DOMINANT","Russian Swing":"HIP DOMINANT",
+  "Swing":"HIP DOMINANT","Nordic Hamstring":"HIP DOMINANT","Reverse Nordic Curl":"HIP DOMINANT",
+  "GHD Glute e Hip Raise":"HIP DOMINANT",
+
+  "Goblet Squat":"SQUAT PATTERN","Back Squat":"SQUAT PATTERN","Front Squat":"SQUAT PATTERN",
+  "Box Squat":"SQUAT PATTERN","Overhead Squat":"SQUAT PATTERN","Zercher Squat":"SQUAT PATTERN",
+  "Pin Squat":"SQUAT PATTERN","Kang Squat":"SQUAT PATTERN","Calf Raises":"SQUAT PATTERN",
+
+  "Bulgarian Squat":"LUNGE PATTERN","Front e Reverse Lunge":"LUNGE PATTERN","Walking Lunge":"LUNGE PATTERN",
+  "Lateral Lunge":"LUNGE PATTERN","Crossover Lunge":"LUNGE PATTERN","Rear Foot Elevated Split Squat":"LUNGE PATTERN",
+  "Front Foot Elevated Split Squat":"LUNGE PATTERN","Step Up":"LUNGE PATTERN","Side Step Up":"LUNGE PATTERN",
+  "Pistol Squat":"LUNGE PATTERN","Pin Split Squat":"LUNGE PATTERN",
+
+  "Leg Press":"MACHINE","Leg Extension":"MACHINE","Leg Curl":"MACHINE",
+  "Adductor Machine":"MACHINE","Abductor Machine":"MACHINE",
+
+  "Clean":"POWER/OLYMPIC","Snatch":"POWER/OLYMPIC","Pwr Clean":"POWER/OLYMPIC","Pwr Snatch":"POWER/OLYMPIC",
+  "Hang Clean":"POWER/OLYMPIC","Hang Snatch":"POWER/OLYMPIC","High Pull":"POWER/OLYMPIC",
+  "Push Press":"POWER/OLYMPIC","Push Jerk":"POWER/OLYMPIC","Thruster":"POWER/OLYMPIC","Wall/Slam Ball":"POWER/OLYMPIC"
+};
 
 function sInit(){
   const ps = document.getElementById('sPlayer');
@@ -184,7 +214,8 @@ function sRefresh(){
   const tavTotal = tavRow ? tavRow.totale : null;
   const ratio = (total!=null && tavTotal) ? (total/tavTotal*100) : null;
 
-  const usedExercises = row ? EXERCISES.filter(e => row[e]!=null) : [];
+  const cat = document.getElementById('sCategory').value;
+  const usedExercises = row ? EXERCISES.filter(e => row[e]!=null && (!cat || EXERCISE_CATEGORY[e]===cat)) : [];
 
   document.getElementById('sCards').innerHTML = `
     <div class="stat-card"><div class="card-label">Carico Totale</div><div class="card-value val-red">${fm(total)}</div></div>
@@ -194,15 +225,17 @@ function sRefresh(){
     <div class="stat-card"><div class="card-label">Differenziato</div><div class="card-value ${row&&row.DIFF===1?'val-warn':'val-green'}">${row&&row.DIFF===1?'Sì':'No'}</div></div>`;
 
   if(!usedExercises.length){
-    wrapDiv.innerHTML = '<div class="empty-st">Nessun esercizio registrato per questa seduta.</div>';
+    wrapDiv.innerHTML = row
+      ? '<div class="empty-st">Nessun esercizio di questa categoria in questa seduta.</div>'
+      : '<div class="empty-st">Nessun esercizio registrato per questa seduta.</div>';
     info.textContent = '';
     return;
   }
   wrapDiv.innerHTML = '<table class="dt" id="sMainTbl"></table>';
   const sorted = [...usedExercises].sort((a,b)=> row[b]-row[a]);
-  let h = '<thead><tr><th>Esercizio</th><th>Carico</th></tr></thead><tbody>';
+  let h = '<thead><tr><th>Esercizio</th><th>Categoria</th><th>Carico</th></tr></thead><tbody>';
   sorted.forEach(ex=>{
-    h += `<tr><td class="exname">${ex}</td><td>${fm(row[ex])}</td></tr>`;
+    h += `<tr><td class="exname">${ex}</td><td>${EXERCISE_CATEGORY[ex]||'—'}</td><td>${fm(row[ex])}</td></tr>`;
   });
   h += '</tbody>';
   document.getElementById('sMainTbl').innerHTML = h;
