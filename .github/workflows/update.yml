@@ -16,6 +16,8 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
+      - name: Scarica XLSX da OneDrive
+        run: wget -q "https://onedrive.live.com/personal/766ff0e2a8280a5b/_layouts/15/doc.aspx?resid=fbc9b6c1-ad69-4341-804b-552ae5b6a1c0&cid=766ff0e2a8280a5b" -O nome_file.xlsx
       - name: Installa dipendenze
         run: pip install pandas openpyxl gdown
       - name: Scarica XLSX GPS da Google Drive
