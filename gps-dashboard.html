@@ -181,6 +181,7 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
       <button class="nav-tab" onclick="showPage('modulazione')">Load Management (Staff)</button>
     </div>
     <button class="nav-tab" onclick="showPage('relazione')" style="margin-left:22px;border-radius:8px;border:1px solid var(--border);">Load Relationships</button>
+    <button class="nav-tab" onclick="showPage('matchcompare')" style="margin-left:10px;border-radius:8px;border:1px solid var(--border);">Match Compare</button>
   </div>
   <div class="topbar-right" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
     <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border,#E5E7EB);border-radius:8px;color:var(--text,#1F2937);text-decoration:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;background:var(--bg2,#FFFFFF);">
@@ -281,6 +282,25 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
   <div class="chart-box"><h3 id="modChartTitle"><span class="dot" style="background:var(--accent)"></span>Team AVG — <span id="modKpiName" style="color:var(--accent);font-weight:800">—</span> — Sedute della settimana vs Target Giornaliero</h3><div class="chart-canvas-wrap" style="height:420px"><canvas id="modChart"></canvas></div></div>
   <div class="table-wrap"><div class="tw-header"><h3>Coefficienti per giorno</h3><button onclick="modResetWeights()" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer">Ripristina distribuzione uniforme</button></div><div style="overflow-x:auto;"><table class="dt" id="modWeightsTbl"></table></div></div>
   <p style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:var(--text2);padding:0 4px">Il <b style="color:#0891B2">target giornaliero</b> (tacca azzurra) e' la Previsione Settimanale Pesata di Team AVG per la misura selezionata, distribuita tra le sedute secondo il coefficiente (%) che imposti in tabella — di default diviso in parti uguali. Il <b style="color:#059669">target adattato</b> (rombo verde) ricalcola invece quanto serve fare nelle sedute ancora da svolgere, tenendo conto di quanto gia' fatto: se sei indietro o avanti rispetto al piano, questo marcatore si aggiorna automaticamente per far tornare i conti a fine settimana. La somma dei coefficienti dovrebbe essere 100%. I coefficienti sono specifici per ogni misura (non per settimana) e restano salvati stabilmente nel browser.</p>
+</div>
+
+<!-- ==================== PAGE: MATCH COMPARE ==================== -->
+<div class="page" id="pagMatchCompare">
+  <div class="filters-row">
+    <div class="kpi-group-field" style="min-width:220px;">
+      <label>Giocatore</label>
+      <div class="kpi-ms-btn" id="mcPlayerBtn"><span class="kpi-ms-summary">Nessuno selezionato</span><span class="kpi-ms-arrow">▾</span></div>
+      <div class="kpi-ms-panel" id="mcPlayerPanel"></div>
+    </div>
+    <div class="kpi-group-field" style="min-width:260px;">
+      <label>Misure</label>
+      <div class="kpi-ms-btn" id="mcKpiBtn"><span class="kpi-ms-summary">Nessuna selezionata</span><span class="kpi-ms-arrow">▾</span></div>
+      <div class="kpi-ms-panel" id="mcKpiPanel"></div>
+    </div>
+    <div class="filter-group"><label>Da Data</label><input type="date" id="mcDateFrom" onchange="mcRefresh()"></div>
+    <div class="filter-group"><label>A Data</label><input type="date" id="mcDateTo" onchange="mcRefresh()"></div>
+  </div>
+  <div id="mcContent"></div>
 </div>
 
 <!-- ==================== PAGE: TEAM STAFF ==================== -->
@@ -411,7 +431,7 @@ const PLAYER_PASSWORD = "leone";
 let staffUnlocked = sessionStorage.getItem('staffUnlocked') === 'true';
 
 function showPage(p){
-  if((p==='player' || p==='teamstaff' || p==='relazione' || p==='modulazione') && !staffUnlocked){
+  if((p==='player' || p==='teamstaff' || p==='relazione' || p==='modulazione' || p==='matchcompare') && !staffUnlocked){
     const pw = prompt("Inserisci la password per accedere a questa sezione:");
     if(pw === PLAYER_PASSWORD){
       staffUnlocked = true;
@@ -427,6 +447,7 @@ function showPage(p){
   else if(p==='teamstaff'){document.getElementById('pagTeamStaff').classList.add('active');document.querySelectorAll('.nav-tab')[1].classList.add('active');tsRefresh();}
   else if(p==='relazione'){document.getElementById('pagRelazione').classList.add('active');document.querySelectorAll('.nav-tab')[4].classList.add('active');relRefresh();}
   else if(p==='modulazione'){document.getElementById('pagModulazione').classList.add('active');document.querySelectorAll('.nav-tab')[3].classList.add('active');modRefresh();}
+  else if(p==='matchcompare'){document.getElementById('pagMatchCompare').classList.add('active');document.querySelectorAll('.nav-tab')[5].classList.add('active');mcRefresh();}
   else{document.getElementById('pagTeam').classList.add('active');document.querySelectorAll('.nav-tab')[2].classList.add('active');tRefresh();}
 }
 
@@ -1173,8 +1194,107 @@ function modRefresh(){
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6B7280',font:{family:'DM Sans',size:11}}}},scales:{x:{ticks:{color:'#6B7280',font:{size:10}},grid:{color:'#E5E7EB'}},y:{ticks:{color:'#6B7280',font:{family:'DM Sans',size:10}},grid:{color:'#E5E7EB'}}}}});
 }
 
+// ========================================================
+//  MATCH COMPARE
+// ========================================================
+let mcSelectedPlayers=new Set(), mcSelectedKpis=new Set();
+
+function mcBuildMultiSelect(btnId,panelId,options,selectedSet,labelFn,onChange){
+  const btn=document.getElementById(btnId),panel=document.getElementById(panelId);
+  function summary(){
+    if(!selectedSet.size)return btnId==='mcPlayerBtn'?'Nessuno selezionato':'Nessuna selezionata';
+    if(selectedSet.size===options.length)return'Tutti ('+selectedSet.size+')';
+    return[...selectedSet].map(labelFn).join(', ');
+  }
+  panel.innerHTML='';
+  options.forEach(opt=>{
+    const row=document.createElement('label');
+    row.className='kpi-ms-opt';
+    const cb=document.createElement('input');
+    cb.type='checkbox';
+    cb.checked=selectedSet.has(opt);
+    cb.onchange=()=>{
+      if(cb.checked)selectedSet.add(opt);else selectedSet.delete(opt);
+      btn.querySelector('.kpi-ms-summary').textContent=summary();
+      onChange();
+    };
+    row.appendChild(cb);
+    row.appendChild(document.createTextNode(labelFn(opt)));
+    panel.appendChild(row);
+  });
+  btn.querySelector('.kpi-ms-summary').textContent=summary();
+  btn.onclick=(e)=>{
+    e.stopPropagation();
+    const wasOpen=panel.classList.contains('open');
+    document.querySelectorAll('.kpi-ms-panel.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.kpi-ms-btn.open').forEach(b=>b.classList.remove('open'));
+    if(!wasOpen){panel.classList.add('open');btn.classList.add('open');}
+  };
+}
+
+function mcInit(){
+  const players=gP();
+  mcBuildMultiSelect('mcPlayerBtn','mcPlayerPanel',players,mcSelectedPlayers,p=>p,mcRefresh);
+  mcBuildMultiSelect('mcKpiBtn','mcKpiPanel',KPIS,mcSelectedKpis,kpiLabel,mcRefresh);
+  const ds=gD();
+  if(ds.length){
+    document.getElementById('mcDateFrom').value=ds[0];
+    document.getElementById('mcDateTo').value=ds[ds.length-1];
+  }
+}
+
+function mcRefresh(){
+  const cont=document.getElementById('mcContent');
+  if(!cont)return;
+  const players=[...mcSelectedPlayers],kpis=[...mcSelectedKpis];
+  const from=document.getElementById('mcDateFrom').value,to=document.getElementById('mcDateTo').value;
+
+  if(!players.length||!kpis.length){
+    cont.innerHTML='<div class="table-wrap"><div class="empty-st" style="padding:60px 20px;text-align:center;color:var(--text2);">Seleziona almeno un giocatore e almeno una misura per vedere il confronto tra le partite.</div></div>';
+    return;
+  }
+
+  let html='';
+  players.forEach(pl=>{
+    const matches=D.filter(r=>r.PLAYER===pl&&r['SESSION TYPE']==='M'&&r.DATA>=from&&r.DATA<=to&&kpis.some(k=>r[k]!=null))
+      .sort((a,b)=>a.DATA.localeCompare(b.DATA));
+    html+=`<div class="table-wrap" style="margin-bottom:18px;"><div class="tw-header"><h3>${pl}</h3><span class="info">${matches.length} partite nel periodo</span></div>`;
+    if(!matches.length){
+      html+='<div class="empty-st" style="padding:40px 20px;text-align:center;color:var(--text2);">Nessuna partita trovata nel periodo selezionato.</div></div>';
+      return;
+    }
+    // media per ogni misura, su tutte le partite del periodo per questo giocatore
+    const avgs={};
+    kpis.forEach(k=>{
+      const vals=matches.map(r=>r[k]).filter(x=>x!=null);
+      avgs[k]=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+    });
+    html+='<div style="overflow-x:auto;"><table class="dt"><thead><tr><th>Data</th>';
+    kpis.forEach(k=>html+=`<th>${kpiLabel(k)}</th>`);
+    html+='</tr></thead><tbody>';
+    matches.forEach(r=>{
+      html+=`<tr><td class="pn">${r.DATA}</td>`;
+      kpis.forEach(k=>{
+        const v=r[k];
+        if(v==null){html+='<td>—</td>';return;}
+        const avg=avgs[k];
+        const pct=avg?((v-avg)/avg*100):null;
+        const col=pct==null?'var(--text2)':pct>=0?'var(--green)':'var(--accent)';
+        const pctTxt=pct!=null?(pct>=0?'+':'')+fm(pct,1)+'%':'';
+        html+=`<td>${fm(v,kpiDecimals(k))} <span style="color:${col};font-size:11px;font-weight:600">${pctTxt}</span></td>`;
+      });
+      html+='</tr>';
+    });
+    html+=`<tr style="font-weight:700;background:rgba(37,99,235,.06)"><td class="pn">Media</td>`;
+    kpis.forEach(k=>html+=`<td>${fm(avgs[k],kpiDecimals(k))}</td>`);
+    html+='</tr>';
+    html+='</tbody></table></div></div>';
+  });
+  cont.innerHTML=html;
+}
+
 // ===== BOOT =====
-pInit();tInit();tsInit();modInit();
+pInit();tInit();tsInit();modInit();mcInit();
 </script>
 </body>
 </html>
