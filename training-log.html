@@ -268,12 +268,16 @@
   .section-label{
     font-family:'Montserrat',sans-serif; font-size:12px; letter-spacing:.06em; text-transform:uppercase;
     display:flex; align-items:center; gap:8px; margin-top:4px;
+    font-weight:700;
   }
   .section-label i{width:8px; height:8px; border-radius:50%;}
   .section-label.tech{color:var(--tech);} .section-label.tech i{background:var(--tech);}
   .section-label.cond{color:var(--cond);} .section-label.cond i{background:var(--cond);}
 
-  .grid4{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .field-section{border:1px solid var(--line); border-radius:var(--radius); padding:16px; background:var(--surface);}
+  .field-section .section-label{margin-top:0; margin-bottom:12px; font-size:13px;}
+
+  .grid4{display:grid; grid-template-columns:1fr; gap:10px;}
   .grid4 .field label{font-size:10px; color:var(--text-faint);}
 
   .modal-foot{
@@ -431,7 +435,7 @@
         <div class="field md-wrap" id="mdWrap">
           <label>Distance from next match</label>
           <div class="md-grid" id="mdGrid"></div>
-          <div class="md-hint">MD-1 = day before the match … MD-8 = eight days out.</div>
+          <div class="md-hint">MD-0 = match day itself … MD-1 = day before the match … MD-8 = eight days out.</div>
         </div>
       </div>
 
@@ -446,25 +450,29 @@
         </div>
       </div>
 
-      <div class="section-label tech"><i></i>Technical / Tactical Skills</div>
-      <div class="grid4">
-        <div class="field"><label>Skill 1</label><input type="text" id="f_t1"></div>
-        <div class="field"><label>Skill 2</label><input type="text" id="f_t2"></div>
-        <div class="field"><label>Skill 3</label><input type="text" id="f_t3"></div>
-        <div class="field"><label>Skill 4</label><input type="text" id="f_t4"></div>
+      <div class="field-section">
+        <div class="section-label tech"><i></i>Technical / Tactical Skills</div>
+        <div class="grid4">
+          <div class="field"><label>Skill 1</label><input type="text" id="f_t1"></div>
+          <div class="field"><label>Skill 2</label><input type="text" id="f_t2"></div>
+          <div class="field"><label>Skill 3</label><input type="text" id="f_t3"></div>
+          <div class="field"><label>Skill 4</label><input type="text" id="f_t4"></div>
+        </div>
       </div>
 
-      <div class="section-label cond"><i></i>Conditioning</div>
-      <div class="grid4">
-        <div class="field"><label>Drill 1</label><input type="text" id="f_c1"></div>
-        <div class="field"><label>Drill 2</label><input type="text" id="f_c2"></div>
-        <div class="field"><label>Drill 3</label><input type="text" id="f_c3"></div>
-        <div class="field"><label>Drill 4</label><input type="text" id="f_c4"></div>
+      <div class="field-section">
+        <div class="section-label cond"><i></i>Conditioning</div>
+        <div class="grid4">
+          <div class="field"><label>Drill 1</label><input type="text" id="f_c1"></div>
+          <div class="field"><label>Drill 2</label><input type="text" id="f_c2"></div>
+          <div class="field"><label>Drill 3</label><input type="text" id="f_c3"></div>
+          <div class="field"><label>Drill 4</label><input type="text" id="f_c4"></div>
+        </div>
       </div>
 
       <div class="field">
         <label>Notes</label>
-        <textarea id="f_notes" placeholder="Fatigue, feeling, adjustments, coach remarks…"></textarea>
+        <textarea id="f_notes" placeholder="Fatigue, feeling, adjustments, coach remarks…" style="min-height:140px;"></textarea>
       </div>
     </div>
     <div class="modal-foot">
@@ -702,8 +710,8 @@
   let currentType = 'training';
   let currentMd = null;
 
-  // build MD-1 .. MD-8 buttons
-  for(let i=1;i<=8;i++){
+  // build MD-0 .. MD-8 buttons (MD-0 = match day itself)
+  for(let i=0;i<=8;i++){
     const b = document.createElement('button');
     b.type='button';
     b.textContent = `MD-${i}`;

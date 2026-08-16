@@ -26,12 +26,14 @@ COLUMN_ALIASES = {
     "HOOPER": "TQR",  # la colonna TQR e' stata rinominata "Hooper" nel foglio Excel
 }
 INT_COLS = {
-    "WEEK", "NEXT MD", "DIFF", "TQR", "sRPE",
+    "WEEK", "NEXT MD", "TQR", "sRPE",
     "nD>16", "nD>20", "nD>25", "nD>30",
     "nDA>2", "nDA>3", "nDD<-2", "nDD<-3",
 }
 EXCEL_ERRORS = {"#REF!", "#VALUE!", "#DIV/0!", "#N/A", "#NULL!", "#NUM!", "#NAME?"}
-TEXT_COLS = {"PLAYER", "SESSION TYPE", "AM/PM"}
+# DIFF ora contiene valori misti: 1 (differenziato), "S" (titolare), "N" (non titolare) —
+# va trattato come testo/valore-cosi'-com'e', non forzato a intero come le altre colonne numeriche.
+TEXT_COLS = {"PLAYER", "SESSION TYPE", "AM/PM", "DIFF"}
 def round_value(col, val):
     if pd.isna(val):
         return None
