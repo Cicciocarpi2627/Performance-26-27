@@ -1052,7 +1052,11 @@ function modResetWeights(){
 // con lo stato titolarita' scelto (S/N/1) — la riga Team AVG reale e' sempre sull'intera squadra,
 // quindi qui si ricalcola da zero usando le stesse regole di aggregazione di aggValues().
 function buildStatusRows(wk,statusFilter){
-  const matches=D.filter(r=>r.PLAYER!=='Team AVG'&&r.WEEK===wk&&String(r.DIFF)===statusFilter);
+  // Con S/N (titolare/non titolare) si escludono automaticamente le sedute di partita (MD-0):
+  // quello stato riguarda il ruolo in allenamento, non ha senso applicato alla partita stessa.
+  // Con "Tutti" o "1" (differenziato) le sedute di partita restano incluse come prima.
+  const excludeMatch=statusFilter==='S'||statusFilter==='N';
+  const matches=D.filter(r=>r.PLAYER!=='Team AVG'&&r.WEEK===wk&&String(r.DIFF)===statusFilter&&(!excludeMatch||r['NEXT MD']!==0));
   const bySession={};
   matches.forEach(r=>{const key=r.DATA+'|'+(r['AM/PM']||'');(bySession[key]=bySession[key]||[]).push(r);});
   return Object.keys(bySession).map(key=>{
