@@ -274,8 +274,21 @@
   .section-label.tech{color:var(--tech);} .section-label.tech i{background:var(--tech);}
   .section-label.cond{color:var(--cond);} .section-label.cond i{background:var(--cond);}
 
-  .field-section{border:1px solid var(--line); border-radius:var(--radius); padding:16px; background:var(--surface);}
+  .field-section{border:1px solid var(--line); border-radius:var(--radius); background:var(--surface);}
   .field-section .section-label{margin-top:0; margin-bottom:12px; font-size:13px;}
+
+  .tt-tabs{display:flex; border-bottom:1px solid var(--line);}
+  .tt-tab{
+    flex:1; padding:12px 16px; border:none; background:transparent; cursor:pointer;
+    font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--text-dim); border-bottom:3px solid transparent; transition:.15s;
+  }
+  .tt-tab.tech.active{color:var(--tech); border-bottom-color:var(--tech);}
+  .tt-tab.cond.active{color:var(--cond); border-bottom-color:var(--cond);}
+  .tt-tab:not(.active):hover{color:var(--text);}
+  .tt-pane-wrap{padding:16px;}
+  .tt-pane{display:none;}
+  .tt-pane.active{display:block;}
 
   .grid4{display:grid; grid-template-columns:1fr; gap:10px;}
   .grid4 .field label{font-size:10px; color:var(--text-faint);}
@@ -450,23 +463,28 @@
         </div>
       </div>
 
-      <div class="field-section">
-        <div class="section-label tech"><i></i>Technical / Tactical Skills</div>
-        <div class="grid4">
-          <div class="field"><label>Skill 1</label><input type="text" id="f_t1"></div>
-          <div class="field"><label>Skill 2</label><input type="text" id="f_t2"></div>
-          <div class="field"><label>Skill 3</label><input type="text" id="f_t3"></div>
-          <div class="field"><label>Skill 4</label><input type="text" id="f_t4"></div>
+      <div class="field-section" style="padding:0; overflow:hidden;">
+        <div class="tt-tabs">
+          <button type="button" class="tt-tab tech active" id="ttTabTech" data-target="ttPaneTech">Technical / Tactical Skills</button>
+          <button type="button" class="tt-tab cond" id="ttTabCond" data-target="ttPaneCond">Conditioning</button>
         </div>
-      </div>
-
-      <div class="field-section">
-        <div class="section-label cond"><i></i>Conditioning</div>
-        <div class="grid4">
-          <div class="field"><label>Drill 1</label><input type="text" id="f_c1"></div>
-          <div class="field"><label>Drill 2</label><input type="text" id="f_c2"></div>
-          <div class="field"><label>Drill 3</label><input type="text" id="f_c3"></div>
-          <div class="field"><label>Drill 4</label><input type="text" id="f_c4"></div>
+        <div class="tt-pane-wrap">
+          <div class="tt-pane active" id="ttPaneTech">
+            <div class="grid4">
+              <div class="field"><label>Skill 1</label><input type="text" id="f_t1"></div>
+              <div class="field"><label>Skill 2</label><input type="text" id="f_t2"></div>
+              <div class="field"><label>Skill 3</label><input type="text" id="f_t3"></div>
+              <div class="field"><label>Skill 4</label><input type="text" id="f_t4"></div>
+            </div>
+          </div>
+          <div class="tt-pane" id="ttPaneCond">
+            <div class="grid4">
+              <div class="field"><label>Drill 1</label><input type="text" id="f_c1"></div>
+              <div class="field"><label>Drill 2</label><input type="text" id="f_c2"></div>
+              <div class="field"><label>Drill 3</label><input type="text" id="f_c3"></div>
+              <div class="field"><label>Drill 4</label><input type="text" id="f_c4"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -754,6 +772,7 @@
     updateSessionButtons();
     updateTypeButtons();
     updateMdButtons();
+    showTtTab('tech');
     overlay.classList.add('open');
   }
   function closeModal(){ overlay.classList.remove('open'); editingId=null; }
@@ -776,6 +795,18 @@
   btnPM.addEventListener('click', ()=>{ currentSession='PM'; updateSessionButtons(); });
   btnTraining.addEventListener('click', ()=>{ currentType='training'; updateTypeButtons(); updateMdButtons(); });
   btnMatch.addEventListener('click', ()=>{ currentType='match'; updateTypeButtons(); updateMdButtons(); });
+
+  // Technical/Conditioning: due schede che si alternano nella stessa area.
+  const ttTabTech = document.getElementById('ttTabTech'), ttTabCond = document.getElementById('ttTabCond');
+  const ttPaneTech = document.getElementById('ttPaneTech'), ttPaneCond = document.getElementById('ttPaneCond');
+  function showTtTab(which){
+    ttTabTech.classList.toggle('active', which==='tech');
+    ttTabCond.classList.toggle('active', which==='cond');
+    ttPaneTech.classList.toggle('active', which==='tech');
+    ttPaneCond.classList.toggle('active', which==='cond');
+  }
+  ttTabTech.addEventListener('click', ()=> showTtTab('tech'));
+  ttTabCond.addEventListener('click', ()=> showTtTab('cond'));
 
   document.getElementById('closeModal').addEventListener('click', closeModal);
   document.getElementById('cancelBtn').addEventListener('click', closeModal);

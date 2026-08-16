@@ -222,7 +222,7 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
       <div class="pred-results" id="pPred"></div>
     </div>
   </div>
-  <div class="table-wrap"><div class="tw-header"><h3>Rapporto Carico vs Team AVG (%)</h3></div><table class="dt" id="pRatioTbl"></table></div>
+  <div class="table-wrap"><div class="tw-header"><h3>Rapporto Carico Sett. vs Propria Partita (%)</h3></div><table class="dt" id="pRatioTbl"></table></div>
   <div class="table-wrap"><div class="tw-header"><h3>Dettaglio Sessioni</h3></div><div style="overflow-x:auto;max-height:500px;overflow-y:auto;"><table class="dt" id="pDetailTbl"></table></div></div>
 </div>
 
@@ -334,7 +334,7 @@ const KPI_GROUP_SIZES=[4,7,6,4,8,4,3]; // Carico(TQR,sRPE,MIN,TL) | FC(FC rip..t
 const KPI_GROUP=(()=>{const a=[];KPI_GROUP_SIZES.forEach((sz,gi)=>{for(let i=0;i<sz;i++)a.push(gi+1);});return a;})();
 const SCEN={"Normale":{w1:30,w2:30,w3:25,w4:15},"Settimana corta":{w1:15,w2:20,w3:20,w4:45},"Rientro":{w1:40,w2:15,w3:15,w4:30},"Pre-season":{w1:20,w2:45,w3:15,w4:20},"Post-partita":{w1:35,w2:20,w3:25,w4:20}};
 
-function gP(){return[...new Set(D.map(r=>r.PLAYER))].filter(p=>p!=='Team AVG').sort();}
+function gP(){return[...new Set(D.map(r=>r.PLAYER))].filter(p=>p&&p!=='Team AVG').sort();}
 function gW(){return[...new Set(D.filter(r=>r.WEEK>0).map(r=>r.WEEK))].sort((a,b)=>a-b);}
 // Ultima settimana con dati realmente registrati (non solo l'ultima presente nel calendario,
 // che potrebbe essere futura e vuota). Usata come default nei filtri di tutte le pagine.
@@ -558,8 +558,8 @@ function pPrediction(pl,kpi,wk,ss){
 }
 
 function pRatio(pl,wk){
-  const tr=D.filter(r=>r.PLAYER===pl&&r.WEEK===wk&&r['NEXT MD']!==0),tmd=D.filter(r=>r.PLAYER==='Team AVG'&&r.WEEK===wk&&r['NEXT MD']===0);
-  let h='<thead><tr><th>Misura</th><th>Somma Sett.</th><th>Team AVG MD</th><th>Rapporto</th></tr></thead><tbody>';
+  const tr=D.filter(r=>r.PLAYER===pl&&r.WEEK===wk&&r['NEXT MD']!==0),tmd=D.filter(r=>r.PLAYER===pl&&r.WEEK===wk&&r['NEXT MD']===0);
+  let h='<thead><tr><th>Misura</th><th>Somma Sett.</th><th>Partita Sett.</th><th>Rapporto</th></tr></thead><tbody>';
   KPIS.forEach(k=>{const ws=sumK(tr,k),tv=sumK(tmd,k),rt=ws!=null&&tv?ws/tv*100:null;
     const col=rt!=null?(rt>=100?'var(--green)':rt>=80?'var(--warn)':'var(--accent)'):'var(--text2)';
     h+=`<tr><td class="pn">${kpiLabel(k)}</td><td>${fm(ws)}</td><td>${fm(tv)}</td><td style="color:${col}">${rt!=null?fm(rt,1)+'%':'—'}<span class="ratio-bar" style="width:${rt?Math.min(rt,200)/2:0}px;background:${col}"></span></td></tr>`;});
@@ -1060,7 +1060,11 @@ function buildStatusRows(wk,statusFilter){
     const synth={DATA:date,'AM/PM':ampm||null,WEEK:wk,'NEXT MD':group[0]['NEXT MD'],PLAYER:'Team AVG'};
     KPIS.forEach(k=>{
       const vals=group.map(r=>r[k]).filter(x=>x!=null);
-      if(vals.length)synth[k]=aggValues(vals,k,'sum');
+      // "Team AVG" e' sempre una MEDIA tra i giocatori del gruppo (non una somma) — a differenza
+      // di aggValues() che gestisce come si combinano piu' SESSIONI dello stesso giocatore nel tempo,
+      // qui si combinano piu' GIOCATORI nella stessa sessione, e la media e' l'operazione corretta
+      // indipendentemente dalla misura.
+      if(vals.length)synth[k]=vals.reduce((a,b)=>a+b,0)/vals.length;
     });
     return synth;
   });
