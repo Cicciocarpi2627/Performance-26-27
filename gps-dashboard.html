@@ -530,9 +530,10 @@ function pDailyChart(pl,kpi,wk){
 }
 
 function pMDChart(pl,kpi){
-  const ws=gW().filter(w=>D.some(r=>r.PLAYER===pl&&r.WEEK===w&&r['NEXT MD']===0&&r[kpi]!=null));
+  const isMatch=r=>r['NEXT MD']===0&&r['SESSION TYPE']==='M';
+  const ws=gW().filter(w=>D.some(r=>r.PLAYER===pl&&r.WEEK===w&&isMatch(r)&&r[kpi]!=null));
   const labels=[],pv=[],tv=[];
-  ws.forEach(w=>{labels.push('S'+w);pv.push(sumK(D.filter(r=>r.PLAYER===pl&&r.WEEK===w&&r['NEXT MD']===0),kpi));tv.push(sumK(D.filter(r=>r.PLAYER==='Team AVG'&&r.WEEK===w&&r['NEXT MD']===0),kpi));});
+  ws.forEach(w=>{labels.push('S'+w);pv.push(sumK(D.filter(r=>r.PLAYER===pl&&r.WEEK===w&&isMatch(r)),kpi));tv.push(sumK(D.filter(r=>r.PLAYER==='Team AVG'&&r.WEEK===w&&isMatch(r)),kpi));});
   if(pChM)pChM.destroy();
   pChM=new Chart(document.getElementById('pChartMD'),{type:'bar',data:{labels,datasets:[{label:pl,data:pv,backgroundColor:'rgba(220,38,38,.6)',borderRadius:3},{label:'Team AVG',data:tv,backgroundColor:'rgba(124,58,237,.35)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6B7280',font:{family:'DM Sans',size:11}}}},scales:{x:{ticks:{color:'#6B7280',font:{size:10}},grid:{color:'#E5E7EB'}},y:{ticks:{color:'#6B7280',font:{family:'DM Sans',size:10}},grid:{color:'#E5E7EB'}}}}});
 }
@@ -558,7 +559,7 @@ function pPrediction(pl,kpi,wk,ss){
 }
 
 function pRatio(pl,wk){
-  const tr=D.filter(r=>r.PLAYER===pl&&r.WEEK===wk&&r['NEXT MD']!==0),tmd=D.filter(r=>r.PLAYER===pl&&r.WEEK===wk&&r['NEXT MD']===0);
+  const tr=D.filter(r=>r.PLAYER===pl&&r.WEEK===wk&&r['NEXT MD']!==0),tmd=D.filter(r=>r.PLAYER===pl&&r.WEEK===wk&&r['NEXT MD']===0&&r['SESSION TYPE']==='M');
   let h='<thead><tr><th>Misura</th><th>Somma Sett.</th><th>Partita Sett.</th><th>Rapporto</th></tr></thead><tbody>';
   KPIS.forEach(k=>{const ws=sumK(tr,k),tv=sumK(tmd,k),rt=ws!=null&&tv?ws/tv*100:null;
     const col=rt!=null?(rt>=100?'var(--green)':rt>=80?'var(--warn)':'var(--accent)'):'var(--text2)';
