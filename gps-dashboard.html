@@ -1197,7 +1197,7 @@ function modRefresh(){
 // ========================================================
 //  MATCH COMPARE
 // ========================================================
-let mcSelectedPlayers=new Set(), mcSelectedKpis=new Set();
+let mcSelectedPlayers=new Set(), mcSelectedKpis=new Set(), mcCharts={};
 
 function mcBuildMultiSelect(btnId,panelId,options,selectedSet,labelFn,onChange){
   const btn=document.getElementById(btnId),panel=document.getElementById(panelId);
@@ -1254,7 +1254,14 @@ function mcRefresh(){
     return;
   }
 
-  let html='';
+  // Un colore per giocatore, riusato in tutti i grafici per coerenza visiva.
+  const PLAYER_COLORS=['#DC2626','#2563EB','#059669','#7C3AED','#D97706','#0891B2','#DB2777','#65A30D','#4F46E5','#EA580C'];
+  const playerColor=(i)=>PLAYER_COLORS[i%PLAYER_COLORS.length];
+
+  // Tutte le date di partita (nel periodo) tra tutti i giocatori selezionati, per un asse condiviso.
+  const allMatchDates=[...new Set(D.filter(r=>players.includes(r.PLAYER)&&r['SESSION TYPE']==='M'&&r.DATA>=from&&r.DATA<=to).map(r=>r.DATA))].sort();
+
+  let html='<div id="mcCharts"></div>';
   players.forEach(pl=>{
     const matches=D.filter(r=>r.PLAYER===pl&&r['SESSION TYPE']==='M'&&r.DATA>=from&&r.DATA<=to&&kpis.some(k=>r[k]!=null))
       .sort((a,b)=>a.DATA.localeCompare(b.DATA));
@@ -1291,6 +1298,33 @@ function mcRefresh(){
     html+='</tbody></table></div></div>';
   });
   cont.innerHTML=html;
+
+  // Un grafico per ogni misura selezionata, con un giocatore per serie, sulle stesse date di partita.
+  Object.keys(mcCharts).forEach(k=>{mcCharts[k].destroy();});
+  mcCharts={};
+  const chartsWrap=document.getElementById('mcCharts');
+  if(!chartsWrap||!allMatchDates.length)return;
+  kpis.forEach((kpi,ki)=>{
+    const box=document.createElement('div');
+    box.className='chart-box';
+    box.style.marginBottom='18px';
+    box.innerHTML=`<h3>${kpiLabel(kpi)} — confronto partite</h3><div class="chart-canvas-wrap" style="height:340px"><canvas id="mcChart_${ki}"></canvas></div>`;
+    chartsWrap.appendChild(box);
+    const datasets=players.map((pl,pi)=>{
+      const byDate={};
+      D.filter(r=>r.PLAYER===pl&&r['SESSION TYPE']==='M'&&r.DATA>=from&&r.DATA<=to).forEach(r=>{byDate[r.DATA]=r[kpi];});
+      return{
+        type:'bar',label:pl,
+        data:allMatchDates.map(d=>byDate[d]!=null?byDate[d]:null),
+        backgroundColor:playerColor(pi),borderRadius:3
+      };
+    });
+    mcCharts[kpi]=new Chart(document.getElementById('mcChart_'+ki),{
+      type:'bar',
+      data:{labels:allMatchDates,datasets},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6B7280',font:{family:'DM Sans',size:11}}}},scales:{x:{ticks:{color:'#6B7280',font:{size:10}},grid:{color:'#E5E7EB'}},y:{ticks:{color:'#6B7280',font:{family:'DM Sans',size:10}},grid:{color:'#E5E7EB'}}}}
+    });
+  });
 }
 
 // ===== BOOT =====
