@@ -178,10 +178,10 @@ tr:hover td.pn,tr.team-row td.pn{background:inherit;}
       <button class="nav-tab" onclick="showPage('player')">Players (Staff)</button>
       <button class="nav-tab" onclick="showPage('teamstaff')">Team (Staff)</button>
       <button class="nav-tab nav-tab-team active" onclick="showPage('team')">Team</button>
+      <button class="nav-tab" onclick="showPage('matchcompare')">Match Compare</button>
       <button class="nav-tab" onclick="showPage('modulazione')">Load Management (Staff)</button>
     </div>
     <button class="nav-tab" onclick="showPage('relazione')" style="margin-left:22px;border-radius:8px;border:1px solid var(--border);">Load Relationships</button>
-    <button class="nav-tab" onclick="showPage('matchcompare')" style="margin-left:10px;border-radius:8px;border:1px solid var(--border);">Match Compare</button>
   </div>
   <div class="topbar-right" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
     <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border,#E5E7EB);border-radius:8px;color:var(--text,#1F2937);text-decoration:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;background:var(--bg2,#FFFFFF);">
@@ -445,9 +445,9 @@ function showPage(p){
   document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
   if(p==='player'){document.getElementById('pagPlayer').classList.add('active');document.querySelectorAll('.nav-tab')[0].classList.add('active');pRefresh();}
   else if(p==='teamstaff'){document.getElementById('pagTeamStaff').classList.add('active');document.querySelectorAll('.nav-tab')[1].classList.add('active');tsRefresh();}
-  else if(p==='relazione'){document.getElementById('pagRelazione').classList.add('active');document.querySelectorAll('.nav-tab')[4].classList.add('active');relRefresh();}
-  else if(p==='modulazione'){document.getElementById('pagModulazione').classList.add('active');document.querySelectorAll('.nav-tab')[3].classList.add('active');modRefresh();}
-  else if(p==='matchcompare'){document.getElementById('pagMatchCompare').classList.add('active');document.querySelectorAll('.nav-tab')[5].classList.add('active');mcRefresh();}
+  else if(p==='relazione'){document.getElementById('pagRelazione').classList.add('active');document.querySelectorAll('.nav-tab')[5].classList.add('active');relRefresh();}
+  else if(p==='modulazione'){document.getElementById('pagModulazione').classList.add('active');document.querySelectorAll('.nav-tab')[4].classList.add('active');modRefresh();}
+  else if(p==='matchcompare'){document.getElementById('pagMatchCompare').classList.add('active');document.querySelectorAll('.nav-tab')[3].classList.add('active');mcRefresh();}
   else{document.getElementById('pagTeam').classList.add('active');document.querySelectorAll('.nav-tab')[2].classList.add('active');tRefresh();}
 }
 
