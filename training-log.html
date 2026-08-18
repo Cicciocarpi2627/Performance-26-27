@@ -342,6 +342,18 @@
     font-size:11px; padding:6px 10px; cursor:pointer; font-family:'Montserrat',sans-serif; letter-spacing:.03em; text-transform:uppercase;
   }
   #user-badge button:hover{border-color:var(--red); color:var(--red);}
+  #printArea{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block; position:absolute; top:0; left:0; width:100%; padding:24px;}
+    #printArea h2{font-family:'Montserrat',sans-serif; font-size:20px; margin-bottom:4px;}
+    #printArea .pr-sub{color:#726d68; font-size:13px; margin-bottom:18px;}
+    #printArea .pr-row{display:flex; gap:24px; margin-bottom:10px; font-size:13px;}
+    #printArea .pr-label{font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:.05em; color:#726d68; margin-bottom:2px;}
+    #printArea .pr-block{margin-bottom:14px;}
+    #printArea .pr-block-title{font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; margin:16px 0 8px; border-bottom:1px solid #ddd; padding-bottom:4px;}
+  }
 </style>
 </head>
 <body>
@@ -496,6 +508,7 @@
     <div class="modal-foot">
       <button class="btn btn-del" id="deleteBtn" style="display:none;">Delete</button>
       <div style="display:flex; gap:10px; margin-left:auto;">
+        <button class="btn btn-cancel" id="printBtn">Print</button>
         <button class="btn btn-cancel" id="cancelBtn">Cancel</button>
         <button class="btn btn-save" id="saveBtn">Save session</button>
       </div>
@@ -544,12 +557,14 @@
       <button class="btn btn-del" id="deleteInjuryBtn" style="display:none;">Delete</button>
       <button class="btn btn-cancel" id="copyInjuryBtn" style="display:none;">Copy</button>
       <div style="display:flex; gap:10px; margin-left:auto;">
+        <button class="btn btn-cancel" id="printInjuryBtn">Print</button>
         <button class="btn btn-cancel" id="cancelInjuryBtn">Cancel</button>
         <button class="btn btn-save" id="saveInjuryBtn">Save injury</button>
       </div>
     </div>
   </div>
 </div>
+<div id="printArea"></div>
 </div><!-- /app-root -->
 
 <script>
@@ -810,6 +825,22 @@
 
   document.getElementById('closeModal').addEventListener('click', closeModal);
   document.getElementById('cancelBtn').addEventListener('click', closeModal);
+
+  document.getElementById('printBtn').addEventListener('click', ()=>{
+    const val = id => document.getElementById(id).value;
+    const dateTxt = fmtDate(val('f_date'));
+    const typeTxt = currentType==='match' ? 'Match Day' : 'Training';
+    const mdTxt = currentType==='training' && currentMd!=null ? ` · MD-${currentMd}` : '';
+    let html = `<h2>${typeTxt} Session</h2><div class="pr-sub">${dateTxt} · ${currentSession==='AM'?'Morning':'Afternoon'}${mdTxt}</div>`;
+    html += `<div class="pr-row"><div><div class="pr-label">Warm-up 1</div>${val('f_wu1')||'—'}</div><div><div class="pr-label">Warm-up 2</div>${val('f_wu2')||'—'}</div></div>`;
+    html += `<div class="pr-block-title">Technical / Tactical Skills</div>`;
+    ['f_t1','f_t2','f_t3','f_t4'].forEach((id,i)=>{ html += `<div class="pr-row"><div class="pr-label">Skill ${i+1}</div></div><div style="margin-bottom:6px;">${val(id)||'—'}</div>`; });
+    html += `<div class="pr-block-title">Conditioning</div>`;
+    ['f_c1','f_c2','f_c3','f_c4'].forEach((id,i)=>{ html += `<div class="pr-row"><div class="pr-label">Drill ${i+1}</div></div><div style="margin-bottom:6px;">${val(id)||'—'}</div>`; });
+    html += `<div class="pr-block-title">Notes</div><div>${(val('f_notes')||'—').replace(/\n/g,'<br>')}</div>`;
+    document.getElementById('printArea').innerHTML = html;
+    window.print();
+  });
   overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
 
   document.getElementById('saveBtn').addEventListener('click', async ()=>{
@@ -969,6 +1000,18 @@
   document.getElementById('addInjuryBtn').addEventListener('click', ()=> openInjuryModal(null));
   document.getElementById('closeInjuryModal').addEventListener('click', closeInjuryModal);
   document.getElementById('cancelInjuryBtn').addEventListener('click', closeInjuryModal);
+
+  document.getElementById('printInjuryBtn').addEventListener('click', ()=>{
+    const val = id => document.getElementById(id).value;
+    const dateTxt = fmtDate(val('i_date'));
+    let html = `<h2>Injury Report</h2><div class="pr-sub">${dateTxt} · ${currentInjurySession==='AM'?'Morning':'Afternoon'}</div>`;
+    html += `<div class="pr-block"><div class="pr-label">Name</div>${val('i_name')||'—'}</div>`;
+    html += `<div class="pr-block"><div class="pr-label">Injury Type</div>${val('i_type')||'—'}</div>`;
+    html += `<div class="pr-block-title">Program</div><div>${(val('i_program')||'—').replace(/\n/g,'<br>')}</div>`;
+    html += `<div class="pr-block-title">Notes</div><div>${(val('i_notes')||'—').replace(/\n/g,'<br>')}</div>`;
+    document.getElementById('printArea').innerHTML = html;
+    window.print();
+  });
   injuryOverlay.addEventListener('click', (e)=>{ if(e.target===injuryOverlay) closeInjuryModal(); });
 
   // "Copy": duplicates the current form as a brand-new injury record (keeps the original untouched).
