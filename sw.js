@@ -1,13 +1,14 @@
 // A.C. Carpi — Service Worker
 // Bump this version string whenever you update any cached file,
 // otherwise users will keep seeing the old cached version.
-const CACHE_NAME = 'ac-carpi-v3';
+const CACHE_NAME = 'ac-carpi-v4';
 
 const APP_SHELL = [
   './',
   './index.html',
   './gps-dashboard.html',
   './strength-dashboard.html',
+  './team-public.html',
   './players%20database.html',
   './training-log.html',
   './manifest.json',
@@ -44,7 +45,7 @@ self.addEventListener('fetch', (event) => {
 
   if (req.mode === 'navigate' || (req.method === 'GET' && req.headers.get('accept')?.includes('text/html'))) {
     event.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-store' })
         .then((res) => {
           const resClone = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
