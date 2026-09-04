@@ -1,4 +1,4 @@
-name: Aggiorna dashboard GPS da Google Drive
+name: Aggiorna dashboard GPS e Strength da Google Drive
 on:
   schedule:
     - cron: '0 6 * * *'
@@ -18,17 +18,23 @@ jobs:
           python-version: '3.11'
       - name: Installa dipendenze
         run: pip install pandas openpyxl gdown
-      - name: Scarica XLSX da Google Drive
+      - name: Scarica XLSX GPS da Google Drive
         run: gdown "https://drive.google.com/uc?id=1KcF1dXYJLAb_XQkVQMJUSnOKaw6wrSdy" -O dati.xlsx
       - name: Aggiorna gps-dashboard.html
         run: python genera_html.py dati.xlsx gps-dashboard.html
+      - name: Aggiorna team-public.html
+        run: python genera_html.py dati.xlsx team-public.html
+      - name: Scarica XLSX Strength da Google Sheets
+        run: wget -q "https://docs.google.com/spreadsheets/d/1TO1EJFeqRD4wlL3_mgxZ6auQ78kx44ox/export?format=xlsx" -O dati_forza.xlsx
+      - name: Aggiorna strength-dashboard.html
+        run: python genera_strength.py dati_forza.xlsx strength-dashboard.html
       - name: Commit e push se ci sono modifiche
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add gps-dashboard.html
+          git add gps-dashboard.html team-public.html strength-dashboard.html
           if ! git diff --staged --quiet; then
-            git commit -m "Aggiornamento dati GPS"
+            git commit -m "Aggiornamento dati GPS e Strength"
             git pull --rebase origin main
             git push
           else
