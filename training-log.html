@@ -475,10 +475,21 @@
 
   <div id="pageInjury" style="display:none;">
     <div class="controls">
-      <div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:16px; color:var(--ink);">Injury Log</div>
-      <button class="add-btn" id="addInjuryBtn" style="margin-left:auto;">+ New injury</button>
+      <div class="view-toggle">
+        <button id="injBtnWeek" class="active">Week</button>
+        <button id="injBtnMonth">Month</button>
+      </div>
+      <div class="nav">
+        <button id="injPrevBtn">‹</button>
+        <div class="period-label" id="injPeriodLabel">—</div>
+        <button id="injNextBtn">›</button>
+        <button class="today-btn" id="injTodayBtn">Today</button>
+      </div>
+      <button class="add-btn" id="addInjuryBtn">+ New injury</button>
     </div>
-    <div id="injuryList" class="injury-list"></div>
+
+    <div id="injWeekView" class="week-grid"></div>
+    <div id="injMonthView" class="month-grid" style="display:none;"></div>
   </div><!-- /pageInjury -->
 </div><!-- /shell -->
 
@@ -999,72 +1010,133 @@
     renderInjuries();
   });
 
-  // ---------- Injury list ----------
+  // ---------- Injury calendar (Week/Month, come in Training Log) ----------
+  let injView = 'week';
+  let injAnchorDate = new Date();
+  const injWeekViewEl = document.getElementById('injWeekView');
+  const injMonthViewEl = document.getElementById('injMonthView');
+  const injPeriodLabel = document.getElementById('injPeriodLabel');
+
   function renderInjuries(){
-    const cont = document.getElementById('injuryList');
-    if(!cont) return;
-    const sorted = [...injuries].sort((a,b)=> b.date.localeCompare(a.date));
-    if(!sorted.length){
-      cont.innerHTML = `<div class="injury-empty">No injuries logged. Click "+ New injury" to add one.</div>`;
-      return;
-    }
-    cont.innerHTML = sorted.map(inj => `
-      <div class="injury-card" data-id="${inj.id}">
-        <div class="injury-card-top">
-          <span class="injury-card-date">${fmtDate(inj.date)} · ${inj.session==='AM'?'Morning':'Afternoon'}</span>
-          <button type="button" class="injury-agenda-btn" data-agenda-id="${inj.id}">Agenda</button>
-        </div>
-        ${inj.name ? `<div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-top:2px;">${escapeHtml(inj.name)}</div>` : ''}
-        <div class="injury-card-type">${escapeHtml(inj.type||'Untitled injury')}</div>
-        ${inj.program ? `<div class="injury-card-program">${escapeHtml(inj.program)}</div>` : ''}
-        <div class="injury-agenda-panel" id="agenda-${inj.id}"></div>
+    if(injView==='week') renderInjuryWeek(); else renderInjuryMonth();
+  }
+
+  function injuryChip(inj){
+    return `<div class="session-chip" data-id="${inj.id}">
+      <div class="sc-top">
+        <span class="badge ${inj.session.toLowerCase()}">${inj.session==='AM'?'Morning':'Afternoon'}</span>
+        <span class="badge type-match">${escapeHtml(inj.type||'Injury')}</span>
       </div>
-    `).join('');
-    cont.querySelectorAll('.injury-card').forEach(card=>{
-      card.addEventListener('click', ()=> openInjuryModal(card.dataset.id));
-    });
-    cont.querySelectorAll('.injury-agenda-btn').forEach(btn=>{
-      btn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        toggleInjuryAgenda(btn.dataset.agendaId);
-      });
-    });
+      ${inj.name ? `<div class="sc-note" style="font-weight:700; color:var(--ink);">${escapeHtml(inj.name)}</div>` : ''}
+      ${inj.program ? `<div class="sc-note">${escapeHtml(inj.program)}</div>` : ''}
+    </div>`;
   }
 
-  // Mostra, per un infortunio, le sedute di squadra registrate da quella data in poi —
-  // cosi' si vede a colpo d'occhio cosa e' stato fatto durante il recupero.
-  function toggleInjuryAgenda(injId){
-    const panel = document.getElementById('agenda-'+injId);
-    if(!panel) return;
-    const isOpen = panel.classList.contains('open');
-    document.querySelectorAll('.injury-agenda-panel.open').forEach(p=>p.classList.remove('open'));
-    if(isOpen) return; // era gia' aperto: lo richiudiamo e basta
+  function renderInjuryWeek(){
+    injWeekViewEl.style.display='grid';
+    injMonthViewEl.style.display='none';
+    const start = startOfWeek(injAnchorDate);
+    const end = new Date(start); end.setDate(end.getDate()+6);
+    injPeriodLabel.textContent = `${start.getDate()} ${MONTHS[start.getMonth()].slice(0,3)} – ${end.getDate()} ${MONTHS[end.getMonth()].slice(0,3)} ${end.getFullYear()}`;
 
-    const inj = injuries.find(x=>x.id===injId);
-    if(!inj){ panel.classList.remove('open'); return; }
+    injWeekViewEl.innerHTML='';
+    const today = new Date();
+    for(let i=0;i<7;i++){
+      const d = new Date(start); d.setDate(start.getDate()+i);
+      const iso = toISO(d);
+      const col = document.createElement('div');
+      col.className = 'day-col'+(sameDay(d,today)?' is-today':'');
 
-    const related = [...entries]
-      .filter(e => e.date >= inj.date)
-      .sort((a,b) => a.date.localeCompare(b.date) || (a.session||'').localeCompare(b.session||''));
+      const dayInjuries = injuries.filter(x=>x.date===iso).sort((a,b)=> a.session==='AM'?-1:1);
+      const chipsHtml = dayInjuries.map(x=>injuryChip(x)).join('');
 
-    if(!related.length){
-      panel.innerHTML = `<div class="agenda-empty">No sessions logged since ${fmtDate(inj.date)}.</div>`;
-    } else {
-      panel.innerHTML = related.map(e => `
-        <div class="agenda-item" data-open-id="${e.id}">
-          <span class="agenda-item-date">${fmtDate(e.date)} · ${e.session==='AM'?'Morning':'Afternoon'}</span>
-          <span class="agenda-item-type ${e.dtype==='match'?'match':'training'}">${e.dtype==='match'?'Match Day':'Training'}</span>
+      col.innerHTML = `
+        <div class="day-head">
+          <span class="dow">${DOW[i]}</span>
+          <span class="dnum">${d.getDate()}</span>
         </div>
-      `).join('');
-      panel.querySelectorAll('.agenda-item').forEach(item=>{
-        item.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          openModal(item.dataset.openId);
-        });
-      });
+        <div class="day-body">
+          ${chipsHtml}
+          <button class="day-add" data-date="${iso}">+ Add injury</button>
+        </div>`;
+      injWeekViewEl.appendChild(col);
     }
-    panel.classList.add('open');
+
+    injWeekViewEl.querySelectorAll('.day-add').forEach(btn=>{
+      btn.addEventListener('click', ()=> openInjuryModal(null, btn.dataset.date));
+    });
+    injWeekViewEl.querySelectorAll('.session-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=> openInjuryModal(chip.dataset.id));
+    });
   }
+
+  function renderInjuryMonth(){
+    injWeekViewEl.style.display='none';
+    injMonthViewEl.style.display='grid';
+    const y = injAnchorDate.getFullYear(), m = injAnchorDate.getMonth();
+    injPeriodLabel.textContent = `${MONTHS[m]} ${y}`;
+
+    injMonthViewEl.innerHTML='';
+    DOW.forEach(d=>{
+      const el = document.createElement('div');
+      el.className='month-dow'; el.textContent=d;
+      injMonthViewEl.appendChild(el);
+    });
+
+    const firstOfMonth = new Date(y,m,1);
+    const gridStart = startOfWeek(firstOfMonth);
+    const today = new Date();
+
+    for(let i=0;i<42;i++){
+      const d = new Date(gridStart); d.setDate(gridStart.getDate()+i);
+      const iso = toISO(d);
+      const outside = d.getMonth()!==m;
+      const dayInjuries = injuries.filter(x=>x.date===iso);
+      const cell = document.createElement('div');
+      cell.className = 'month-cell'+(outside?' outside':'')+(sameDay(d,today)?' is-today':'')+(dayInjuries.length?' has-match':'');
+      const tags = dayInjuries.slice(0,3).map(x=>{
+        return `<div class="mc-tag match"><i class="${x.session.toLowerCase()}"></i>${x.session} · ${escapeHtml(x.name||x.type||'Injury')}</div>`;
+      }).join('');
+      cell.innerHTML = `<div class="mc-num">${d.getDate()}</div><div class="mc-sessions">${tags}</div>`;
+      cell.addEventListener('click', ()=>{
+        injAnchorDate = d;
+        injView='week';
+        document.getElementById('injBtnWeek').classList.add('active');
+        document.getElementById('injBtnMonth').classList.remove('active');
+        renderInjuries();
+      });
+      injMonthViewEl.appendChild(cell);
+    }
+  }
+
+  document.getElementById('injBtnWeek').addEventListener('click', ()=>{
+    injView='week';
+    document.getElementById('injBtnWeek').classList.add('active');
+    document.getElementById('injBtnMonth').classList.remove('active');
+    renderInjuries();
+  });
+  document.getElementById('injBtnMonth').addEventListener('click', ()=>{
+    injView='month';
+    document.getElementById('injBtnMonth').classList.add('active');
+    document.getElementById('injBtnWeek').classList.remove('active');
+    renderInjuries();
+  });
+  document.getElementById('injPrevBtn').addEventListener('click', ()=>{
+    if(injView==='week') injAnchorDate.setDate(injAnchorDate.getDate()-7);
+    else injAnchorDate.setMonth(injAnchorDate.getMonth()-1);
+    injAnchorDate = new Date(injAnchorDate);
+    renderInjuries();
+  });
+  document.getElementById('injNextBtn').addEventListener('click', ()=>{
+    if(injView==='week') injAnchorDate.setDate(injAnchorDate.getDate()+7);
+    else injAnchorDate.setMonth(injAnchorDate.getMonth()+1);
+    injAnchorDate = new Date(injAnchorDate);
+    renderInjuries();
+  });
+  document.getElementById('injTodayBtn').addEventListener('click', ()=>{
+    injAnchorDate = new Date();
+    renderInjuries();
+  });
 
   // ---------- Injury modal ----------
   const injuryOverlay = document.getElementById('injuryOverlay');
@@ -1081,7 +1153,7 @@
   iBtnAM.addEventListener('click', ()=>{ currentInjurySession='AM'; updateInjurySessionButtons(); });
   iBtnPM.addEventListener('click', ()=>{ currentInjurySession='PM'; updateInjurySessionButtons(); });
 
-  function openInjuryModal(id){
+  function openInjuryModal(id, presetDate){
     editingInjuryId = id || null;
     const deleteInjuryBtn = document.getElementById('deleteInjuryBtn');
     const copyInjuryBtn = document.getElementById('copyInjuryBtn');
@@ -1101,7 +1173,7 @@
       deleteInjuryBtn.style.display='none';
       copyInjuryBtn.style.display='none';
       document.getElementById('i_name').value = '';
-      document.getElementById('i_date').value = toISO(new Date());
+      document.getElementById('i_date').value = presetDate || toISO(new Date());
       currentInjurySession = 'AM';
       document.getElementById('i_type').value = '';
       document.getElementById('i_program').value = '';
