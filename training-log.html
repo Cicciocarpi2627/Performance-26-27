@@ -146,6 +146,28 @@
   .injury-card-program{font-size:12.5px; color:var(--text-dim); margin-top:8px; line-height:1.5; max-height:44px; overflow:hidden;}
   .injury-empty{text-align:center; padding:60px 20px; color:var(--text-faint); font-size:14px;}
 
+  .injury-agenda-btn{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
+    padding:5px 12px; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.03em; color:var(--text-dim); cursor:pointer; flex-shrink:0;
+  }
+  .injury-agenda-btn:hover{border-color:var(--red); color:var(--red);}
+  .injury-agenda-panel{display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+  .injury-agenda-panel.open{display:block;}
+  .agenda-empty{font-size:12.5px; color:var(--text-faint); padding:4px 0;}
+  .agenda-item{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:8px 10px; border-radius:6px; font-size:12.5px; cursor:pointer;
+  }
+  .agenda-item:hover{background:var(--surface-2);}
+  .agenda-item-date{color:var(--ink); font-weight:600;}
+  .agenda-item-type{
+    font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.03em; padding:3px 8px; border-radius:5px; flex-shrink:0;
+  }
+  .agenda-item-type.training{background:var(--surface-3); color:var(--ink-2);}
+  .agenda-item-type.match{background:var(--red); color:#fff;}
+
   .nav{display:flex; align-items:center; gap:10px;}
   .nav button{
     background:var(--surface); border:1px solid var(--line); color:var(--text);
@@ -990,15 +1012,58 @@
       <div class="injury-card" data-id="${inj.id}">
         <div class="injury-card-top">
           <span class="injury-card-date">${fmtDate(inj.date)} · ${inj.session==='AM'?'Morning':'Afternoon'}</span>
+          <button type="button" class="injury-agenda-btn" data-agenda-id="${inj.id}">Agenda</button>
         </div>
         ${inj.name ? `<div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:14px; color:var(--ink); margin-top:2px;">${escapeHtml(inj.name)}</div>` : ''}
         <div class="injury-card-type">${escapeHtml(inj.type||'Untitled injury')}</div>
         ${inj.program ? `<div class="injury-card-program">${escapeHtml(inj.program)}</div>` : ''}
+        <div class="injury-agenda-panel" id="agenda-${inj.id}"></div>
       </div>
     `).join('');
     cont.querySelectorAll('.injury-card').forEach(card=>{
       card.addEventListener('click', ()=> openInjuryModal(card.dataset.id));
     });
+    cont.querySelectorAll('.injury-agenda-btn').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        toggleInjuryAgenda(btn.dataset.agendaId);
+      });
+    });
+  }
+
+  // Mostra, per un infortunio, le sedute di squadra registrate da quella data in poi —
+  // cosi' si vede a colpo d'occhio cosa e' stato fatto durante il recupero.
+  function toggleInjuryAgenda(injId){
+    const panel = document.getElementById('agenda-'+injId);
+    if(!panel) return;
+    const isOpen = panel.classList.contains('open');
+    document.querySelectorAll('.injury-agenda-panel.open').forEach(p=>p.classList.remove('open'));
+    if(isOpen) return; // era gia' aperto: lo richiudiamo e basta
+
+    const inj = injuries.find(x=>x.id===injId);
+    if(!inj){ panel.classList.remove('open'); return; }
+
+    const related = [...entries]
+      .filter(e => e.date >= inj.date)
+      .sort((a,b) => a.date.localeCompare(b.date) || (a.session||'').localeCompare(b.session||''));
+
+    if(!related.length){
+      panel.innerHTML = `<div class="agenda-empty">No sessions logged since ${fmtDate(inj.date)}.</div>`;
+    } else {
+      panel.innerHTML = related.map(e => `
+        <div class="agenda-item" data-open-id="${e.id}">
+          <span class="agenda-item-date">${fmtDate(e.date)} · ${e.session==='AM'?'Morning':'Afternoon'}</span>
+          <span class="agenda-item-type ${e.dtype==='match'?'match':'training'}">${e.dtype==='match'?'Match Day':'Training'}</span>
+        </div>
+      `).join('');
+      panel.querySelectorAll('.agenda-item').forEach(item=>{
+        item.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          openModal(item.dataset.openId);
+        });
+      });
+    }
+    panel.classList.add('open');
   }
 
   // ---------- Injury modal ----------
