@@ -46,7 +46,7 @@ jobs:
         run: python genera_strength.py dati_forza.xlsx strength-dashboard.html
 
       - name: Commit e push se ci sono modifiche
-        run: 
+        run: https://1drv.ms/x/c/766ff0e2a8280a5b/IQAtND-5tqICS5R4coNfjr0wAUvUo857oG4uCbzAqCgDUHQ?e=3IQ9Op
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add gps-dashboard.html team-public.html strength-dashboard.html
