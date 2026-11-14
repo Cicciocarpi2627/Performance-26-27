@@ -22,9 +22,23 @@ def share_api_url(link):
     return f"https://api.onedrive.com/v1.0/shares/u!{b64}/root/content"
 
 
+def resolve(link):
+    """Segue i reindirizzamenti dei link brevi (1drv.ms) e restituisce l'URL finale."""
+    try:
+        req = urllib.request.Request(link, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return resp.geturl()
+    except Exception:
+        return link
+
+
 def direct_url(link):
     """Restituisce l'URL da cui scaricare direttamente il file."""
     link = link.strip()
+    if "1drv.ms" in link:
+        final = resolve(link)
+        if "sharepoint.com" in final:
+            link = final
     if "sharepoint.com" in link:
         if "download=1" in link:
             return link
@@ -62,7 +76,8 @@ def main():
     try:
         data = fetch(url)
     except urllib.error.HTTPError as e:
-        sys.exit(f"ERRORE: OneDrive ha risposto {e.code} {e.reason}. Controlla il link di condivisione.")
+        sys.exit(f"ERRORE: OneDrive ha risposto {e.code} {e.reason}. Controlla il link di condivisione.\n"
+                 "401/403 = il link non e' pubblico: in OneDrive imposta 'Chiunque abbia il collegamento puo' visualizzare'.")
     except urllib.error.URLError as e:
         sys.exit(f"ERRORE di rete: {e.reason}")
     save_xlsx(data, out_path)
