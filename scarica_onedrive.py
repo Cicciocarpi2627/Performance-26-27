@@ -51,9 +51,20 @@ def candidate_urls(link):
             b64 = base64.urlsafe_b64encode(link.encode("utf-8")).decode("ascii").rstrip("=")
             urls.append(f"https://{host}/_api/v2.0/shares/u!{b64}/driveitem/content")
     urls.append(share_api_url(link))
-    if "onedrive.live.com" in link or "1drv.ms" in link:
-        sep = "&" if "?" in link else "?"
-        urls.append(link.replace("redir?", "download?").replace("/redir", "/download") + "")
+    for base in (final, link):
+        if "onedrive.live.com" in base:
+            q = urllib.parse.parse_qs(urllib.parse.urlsplit(base).query)
+            resid = (q.get("resid") or q.get("id") or [""])[0]
+            auth = (q.get("authkey") or [""])[0]
+            if resid:
+                d = "https://onedrive.live.com/download?resid=" + urllib.parse.quote(resid)
+                if auth:
+                    d += "&authkey=" + urllib.parse.quote(auth)
+                cid = (q.get("cid") or [""])[0]
+                if cid:
+                    d += "&cid=" + urllib.parse.quote(cid)
+                urls.insert(0, d)
+            urls.append(base.replace("/redir?", "/download?").replace("/edit?", "/download?").replace("/view.aspx?", "/download?").replace("/edit.aspx?", "/download?"))
     out = []
     for u in urls:
         if u not in out:
@@ -61,10 +72,25 @@ def candidate_urls(link):
     return out
 
 
+LAST_INFO = {}
+
+
 def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with _opener.open(req, timeout=120) as resp:
+        LAST_INFO["final_host"] = urllib.parse.urlsplit(resp.geturl()).netloc
+        LAST_INFO["ctype"] = resp.headers.get("Content-Type", "")
         return resp.read()
+
+
+def describe_html(data):
+    """Info sicure (niente link) su una pagina HTML ricevuta al posto del file."""
+    import re
+    txt = data[:200000].decode("utf-8", "ignore")
+    m = re.search(r"<title[^>]*>(.*?)</title>", txt, re.S | re.I)
+    title = (m.group(1).strip() if m else "")[:100]
+    flags = [k for k in ("login", "signin", "sign in", "accedi", "microsoftonline", "password", "verification", "codice") if k in txt.lower()]
+    return f"host finale={LAST_INFO.get('final_host')}, titolo='{title}', parole chiave={flags}"
 
 
 def save_xlsx(data, out_path):
@@ -104,7 +130,7 @@ def main():
             save_xlsx(data, out_path)
             return
         last = "risposta non Excel (pagina HTML)"
-        print(f"Tentativo {i} ({host}): {last}")
+        print(f"Tentativo {i} ({host}): {last} -> {describe_html(data)}")
     sys.exit(f"ERRORE: tutti i tentativi falliti (ultimo: {last}). "
              "Controlla che il link sia 'Chiunque abbia il collegamento puo' visualizzare'.")
 
