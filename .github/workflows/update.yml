@@ -33,7 +33,7 @@ jobs:
         run: python scarica_onedrive.py "$ONEDRIVE_URL" dati.xlsx
 
       - name: Genera GPS dashboard e Team
-        run: https://onedrive.live.com/personal/766ff0e2a8280a5b/_layouts/15/Doc.aspx?sourcedoc=%7B5A750B33-5892-4CD7-BA0E-5D749CD31A99%7D&file=Dati%20Giornalieri%20per%20pBI.xlsx&action=default&mobileredirect=true
+        run: https://1drv.ms/x/c/766ff0e2a8280a5b/IQAzC3VakljXTLoOXXSc0xqZASAbme5tz7v_U9FZq41oP2E?e=RY9HIb
           python genera_html.py dati.xlsx gps-dashboard.html
           python genera_html.py dati.xlsx team-public.html
 
@@ -46,7 +46,7 @@ jobs:
         run: python genera_strength.py dati_forza.xlsx strength-dashboard.html
 
       - name: Commit e push se ci sono modifiche
-        run: https://onedrive.live.com/personal/766ff0e2a8280a5b/_layouts/15/Doc.aspx?sourcedoc=%7B15230BB8-BD3C-4120-9B4D-0FFFBB75D2CC%7D&file=Dati%20Giornalieri%20per%20Forza.xlsx&action=default&mobileredirect=true
+        run: https://1drv.ms/x/c/766ff0e2a8280a5b/IQC4CyMVPL0gQZtND_-7ddLMAQm5SwT6n8v6xIcfd8AvTNs?e=5TPGPQ
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add gps-dashboard.html team-public.html strength-dashboard.html
