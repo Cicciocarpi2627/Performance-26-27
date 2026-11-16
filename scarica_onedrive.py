@@ -160,7 +160,7 @@ def main():
             if d2[:2] == b"PK" or d2[:4] == b"\xd0\xcf\x11\xe0":
                 save_xlsx(d2, out_path)
                 return
-            print(f"  download estratto {j}: non e' un Excel")
+            print(f"  download estratto {j}: non e' un Excel -> host={LAST_INFO.get('final_host')}, tipo={LAST_INFO.get('ctype')}, byte={len(d2)}, inizio={d2[:12]!r}")
     sys.exit(f"ERRORE: tutti i tentativi falliti (ultimo: {last}). "
              "Controlla che il link sia 'Chiunque abbia il collegamento puo' visualizzare'.")
 
