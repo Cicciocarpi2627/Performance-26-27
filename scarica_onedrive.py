@@ -64,6 +64,8 @@ def candidate_urls(link):
                 if cid:
                     d += "&cid=" + urllib.parse.quote(cid)
                 urls.insert(0, d)
+            if "redeem=" in base:
+                urls.append(base + ("&" if "?" in base else "?") + "download=1")
             urls.append(base.replace("/redir?", "/download?").replace("/edit?", "/download?").replace("/view.aspx?", "/download?").replace("/edit.aspx?", "/download?"))
     out = []
     for u in urls:
@@ -81,6 +83,22 @@ def fetch(url):
         LAST_INFO["final_host"] = urllib.parse.urlsplit(resp.geturl()).netloc
         LAST_INFO["ctype"] = resp.headers.get("Content-Type", "")
         return resp.read()
+
+
+def extract_download_urls(data):
+    """Cerca nella pagina di anteprima l'indirizzo di download diretto del file."""
+    import re, json
+    txt = data.decode("utf-8", "ignore")
+    found = []
+    for key in ("@content.downloadUrl", "downloadUrl", "FileGetUrl", "g_downloadUrl"):
+        for m in re.finditer(r'"' + re.escape(key) + r'"\s*:\s*("(?:[^"\\]|\\.)*")', txt):
+            try:
+                u = json.loads(m.group(1))
+            except Exception:
+                continue
+            if u.startswith("http") and u not in found:
+                found.append(u)
+    return found
 
 
 def describe_html(data):
@@ -131,6 +149,18 @@ def main():
             return
         last = "risposta non Excel (pagina HTML)"
         print(f"Tentativo {i} ({host}): {last} -> {describe_html(data)}")
+        extra = extract_download_urls(data)
+        print(f"  indirizzi di download trovati nella pagina: {len(extra)}")
+        for j, eu in enumerate(extra, 1):
+            try:
+                d2 = fetch(eu)
+            except Exception as e:
+                print(f"  download estratto {j} ({urllib.parse.urlsplit(eu).netloc}): errore {e}")
+                continue
+            if d2[:2] == b"PK" or d2[:4] == b"\xd0\xcf\x11\xe0":
+                save_xlsx(d2, out_path)
+                return
+            print(f"  download estratto {j}: non e' un Excel")
     sys.exit(f"ERRORE: tutti i tentativi falliti (ultimo: {last}). "
              "Controlla che il link sia 'Chiunque abbia il collegamento puo' visualizzare'.")
 
